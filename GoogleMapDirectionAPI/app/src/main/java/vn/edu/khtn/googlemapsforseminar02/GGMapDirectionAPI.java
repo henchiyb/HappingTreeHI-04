@@ -178,6 +178,7 @@ public class GGMapDirectionAPI extends AppCompatActivity implements OnMapReadyCa
         maker.showInfoWindow();
 
         final Marker makerWater = createTreeMarker(layNuoc, R.drawable.ic_tree_with_three_circles_of_foliage, 1.0f);
+
         new Handler().postDelayed(new AnimateMarker(makerWater, 0.5F, 0.1F), 50);
         makerWater.showInfoWindow();
 
