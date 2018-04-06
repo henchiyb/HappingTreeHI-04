@@ -7,6 +7,7 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Matrix;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.location.Criteria;
@@ -21,6 +22,7 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
@@ -46,6 +48,8 @@ import com.google.android.gms.maps.model.SquareCap;
 
 import java.util.ArrayList;
 
+import cn.fanrunqi.waveprogress.WaveProgressView;
+
 public class GGMapDirectionAPI extends AppCompatActivity implements OnMapReadyCallback, LocationListener{
 
     private static final int REQUEST_ID_ACCESS_COURSE_FINE_LOCATION = 100;
@@ -55,10 +59,19 @@ public class GGMapDirectionAPI extends AppCompatActivity implements OnMapReadyCa
     private Polyline line;
     private GoogleMap map;
     private AsyncTask<Position, Void, Void> task;
+    private WaveProgressView waveProgressView;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_ggmap_direction_api);
+        waveProgressView = findViewById(R.id.waveProgressbar);
+        waveProgressView.setCurrent(55,"");
+        waveProgressView.setMaxProgress(100);
+        waveProgressView.setText("#FFFF00", 40);
+        waveProgressView.setWaveColor("#5b9ef4"); //"#5b9ef4"
+        waveProgressView.setWave(5, 20);
+        waveProgressView.setmWaveSpeed(10);//The larger the value, the slower the vibration
+
         SupportMapFragment mapFragment = ((SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.mapDirection));
         mapFragment.getMapAsync(this);
@@ -132,8 +145,7 @@ public class GGMapDirectionAPI extends AppCompatActivity implements OnMapReadyCa
                     MIN_DISTANCE_CHANGE_FOR_UPDATES, (LocationListener) this);
 
             // Lấy ra vị trí.
-            myLocation = locationManager
-                    .getLastKnownLocation(locationProvider);
+            myLocation = locationManager.getLastKnownLocation(locationProvider);
             return myLocation;
         }
         // Với Android API >= 23 phải catch SecurityException.
@@ -158,14 +170,67 @@ public class GGMapDirectionAPI extends AppCompatActivity implements OnMapReadyCa
     public void onMapReady(GoogleMap googleMap) {
         this.map = googleMap;
         LatLng haYen = new LatLng(21.0207512, 105.7938957);
+        LatLng layNuoc = new LatLng(21.030754, 105.7938977);
         LatLng PhoDiBoNguyenHue = new LatLng(10.774467, 106.703274);
 
         Marker maker = createTreeMarker(haYen, R.drawable.ic_tree_with_three_circles_of_foliage, 1.0f);
         new Handler().postDelayed(new AnimateMarker(maker, 0.5F, 0.1F), 50);
         maker.showInfoWindow();
 
+        final Marker makerWater = createTreeMarker(layNuoc, R.drawable.ic_tree_with_three_circles_of_foliage, 1.0f);
+        new Handler().postDelayed(new AnimateMarker(makerWater, 0.5F, 0.1F), 50);
+        makerWater.showInfoWindow();
+
         Marker maker2 = createTreeMarker(PhoDiBoNguyenHue, R.drawable.ic_big_pine_tree_shape, 1.0f);
         maker2.showInfoWindow();
+
+        waveProgressView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                listStep = new ArrayList<LatLng>();
+                polyline = new PolylineOptions();
+                Position position = new Position();
+                position.setDesLat(Double.toString(makerWater.getPosition().latitude));
+                position.setDesIng(Double.toString(makerWater.getPosition().longitude));
+
+                task = new AsyncTask<Position, Void, Void>() {
+
+                    @Override
+                    protected Void doInBackground(Position... params) {
+
+                        // Ha Yen : 21.0207512, 105.7938957
+                        Location location = getMyLocation();
+                        String request = makeURL(location.getLatitude()+"", location.getLongitude()+"",
+                                params[0].getDesLat(), params[0].getDesIng());
+                        Log.d("Test URL: ", request);
+                        GetDirectionsTask task = new GetDirectionsTask(request);
+                        ArrayList<LatLng> list = task.testDirection();
+                        for (LatLng latLng : list) {
+                            listStep.add(latLng);
+                        }
+                        return null;
+                    }
+
+                    @Override
+                    protected void onPostExecute(Void result) {
+                        // TODO Auto-generated method stub
+                        super.onPostExecute(result);
+                        int arrowColor = Color.BLUE;
+                        BitmapDescriptor endCapIcon = getEndCapIcon(GGMapDirectionAPI.this, arrowColor);
+                        polyline.addAll(listStep);
+                        polyline.jointType(JointType.ROUND);
+                        polyline.geodesic(true);
+                        polyline.startCap(new CustomCap(endCapIcon,8));
+                        if (line != null)
+                            line.remove();
+                        line = map.addPolyline(polyline);
+                        line.setColor(Color.BLUE);
+                        line.setWidth(10);
+                    }
+                };
+                task.execute(position);
+            }
+        });
         map.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
             @SuppressLint("StaticFieldLeak")
             @Override
@@ -198,9 +263,7 @@ public class GGMapDirectionAPI extends AppCompatActivity implements OnMapReadyCa
                     protected void onPostExecute(Void result) {
                         // TODO Auto-generated method stub
                         super.onPostExecute(result);
-                        int arrowColor = Color.RED; // change this if you want another color (Color.BLUE)
-                        int lineColor = Color.RED;
-
+                        int arrowColor = Color.BLUE;
                         BitmapDescriptor endCapIcon = getEndCapIcon(GGMapDirectionAPI.this, arrowColor);
                         polyline.addAll(listStep);
                         polyline.jointType(JointType.ROUND);
@@ -256,17 +319,20 @@ public class GGMapDirectionAPI extends AppCompatActivity implements OnMapReadyCa
         // overlay (multiply) your color over the white icon
         drawable.setColorFilter(color, PorterDuff.Mode.MULTIPLY);
         // create a bitmap from the drawable
-        android.graphics.Bitmap bitmap = android.graphics.Bitmap.createBitmap(drawable.getIntrinsicWidth(),
+        Bitmap bitmap = Bitmap.createBitmap(drawable.getIntrinsicWidth(),
                 drawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
 
         // render the bitmap on a blank canvas
         Canvas canvas = new Canvas(bitmap);
         drawable.draw(canvas);
-
         // create a BitmapDescriptor from the new bitmap
-        return BitmapDescriptorFactory.fromBitmap(bitmap);
+        return BitmapDescriptorFactory.fromBitmap(rotateBitmap(bitmap, 90));
     }
-
+    private Bitmap rotateBitmap(Bitmap source, float angle) {
+        Matrix matrix = new Matrix();
+        matrix.postRotate(angle);
+        return Bitmap.createBitmap(source, 0, 0, source.getWidth(), source.getHeight(), matrix, true);
+    }
     @Override
     public void onRequestPermissionsResult(int requestCode,
                                            String permissions[], int[] grantResults) {
@@ -300,7 +366,6 @@ public class GGMapDirectionAPI extends AppCompatActivity implements OnMapReadyCa
         if (myLocation != null) {
             LatLng latLng = new LatLng(myLocation.getLatitude(), myLocation.getLongitude());
             map.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 17));
-
         } else {
             Toast.makeText(this, "Location not found!", Toast.LENGTH_LONG).show();
             Log.i(MYTAG, "Location not found");
