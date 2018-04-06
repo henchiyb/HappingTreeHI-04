@@ -10,19 +10,10 @@
         android:name="com.google.android.gms.maps.SupportMapFragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
-<<<<<<< HEAD
     <cn.fanrunqi.waveprogress.WaveProgressView
         android:id="@+id/waveProgressbar"
         android:layout_margin="20dp"
         android:background="@drawable/watering_can"
         android:layout_width="50dp"
         android:layout_height="50dp" />
-=======
-    <!--<cn.fanrunqi.waveprogress.WaveProgressView-->
-        <!--android:id="@+id/waveProgressbar"-->
-        <!--android:layout_margin="20dp"-->
-        <!--android:background="@drawable/watering_can"-->
-        <!--android:layout_width="50dp"-->
-        <!--android:layout_height="50dp" />-->
->>>>>>> master
 </RelativeLayout>

@@ -1,11 +1,7 @@
 
 <resources>
     <string name="app_name">GoogleMapsForSeminar02</string>
-<<<<<<< HEAD
     <string name="google_api_key">AIzaSyBf4GS88KSkAAInkzVlTi4yyAyQf3EwdTo</string>
-=======
-    <string name="google_api_key">AIzaSyAMj13Src6WpRJi1H-DHNyBDg2Qkzbi4Aw</string>
->>>>>>> master
 </resources>
 
 
