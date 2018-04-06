@@ -59,18 +59,18 @@ public class GGMapDirectionAPI extends AppCompatActivity implements OnMapReadyCa
     private Polyline line;
     private GoogleMap map;
     private AsyncTask<Position, Void, Void> task;
-//    private WaveProgressView waveProgressView;
+    private WaveProgressView waveProgressView;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_ggmap_direction_api);
-//        waveProgressView = findViewById(R.id.waveProgressbar);
-//        waveProgressView.setCurrent(55,"");
-//        waveProgressView.setMaxProgress(100);
-//        waveProgressView.setText("#FFFF00", 40);
-//        waveProgressView.setWaveColor("#5b9ef4"); //"#5b9ef4"
-//        waveProgressView.setWave(5, 20);
-//        waveProgressView.setmWaveSpeed(10);//The larger the value, the slower the vibration
+        waveProgressView = findViewById(R.id.waveProgressbar);
+        waveProgressView.setCurrent(55,"");
+        waveProgressView.setMaxProgress(100);
+        waveProgressView.setText("#FFFF00", 40);
+        waveProgressView.setWaveColor("#5b9ef4"); //"#5b9ef4"
+        waveProgressView.setWave(5, 20);
+        waveProgressView.setmWaveSpeed(10);//The larger the value, the slower the vibration
 
         SupportMapFragment mapFragment = ((SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.mapDirection));
@@ -170,19 +170,68 @@ public class GGMapDirectionAPI extends AppCompatActivity implements OnMapReadyCa
     public void onMapReady(GoogleMap googleMap) {
         this.map = googleMap;
         LatLng haYen = new LatLng(21.0207512, 105.7938957);
-        LatLng layNuoc = new LatLng(21.020754, 105.7938977);
+        LatLng layNuoc = new LatLng(21.030754, 105.7938977);
         LatLng PhoDiBoNguyenHue = new LatLng(10.774467, 106.703274);
 
         Marker maker = createTreeMarker(haYen, R.drawable.ic_tree_with_three_circles_of_foliage, 1.0f);
         new Handler().postDelayed(new AnimateMarker(maker, 0.5F, 0.1F), 50);
         maker.showInfoWindow();
 
-        Marker makerWater = createTreeMarker(layNuoc, R.drawable.ic_tree_with_three_circles_of_foliage, 1.0f);
+        final Marker makerWater = createTreeMarker(layNuoc, R.drawable.ic_tree_with_three_circles_of_foliage, 1.0f);
+
         new Handler().postDelayed(new AnimateMarker(makerWater, 0.5F, 0.1F), 50);
         makerWater.showInfoWindow();
 
         Marker maker2 = createTreeMarker(PhoDiBoNguyenHue, R.drawable.ic_big_pine_tree_shape, 1.0f);
         maker2.showInfoWindow();
+
+        waveProgressView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                listStep = new ArrayList<LatLng>();
+                polyline = new PolylineOptions();
+                Position position = new Position();
+                position.setDesLat(Double.toString(makerWater.getPosition().latitude));
+                position.setDesIng(Double.toString(makerWater.getPosition().longitude));
+
+                task = new AsyncTask<Position, Void, Void>() {
+
+                    @Override
+                    protected Void doInBackground(Position... params) {
+
+                        // Ha Yen : 21.0207512, 105.7938957
+                        Location location = getMyLocation();
+                        String request = makeURL(location.getLatitude()+"", location.getLongitude()+"",
+                                params[0].getDesLat(), params[0].getDesIng());
+                        Log.d("Test URL: ", request);
+                        GetDirectionsTask task = new GetDirectionsTask(request);
+                        ArrayList<LatLng> list = task.testDirection();
+                        for (LatLng latLng : list) {
+                            listStep.add(latLng);
+                        }
+                        return null;
+                    }
+
+                    @Override
+                    protected void onPostExecute(Void result) {
+                        // TODO Auto-generated method stub
+                        super.onPostExecute(result);
+                        int arrowColor = Color.BLUE;
+                        BitmapDescriptor endCapIcon = getEndCapIcon(GGMapDirectionAPI.this, arrowColor);
+                        polyline.addAll(listStep);
+                        polyline.jointType(JointType.ROUND);
+                        polyline.geodesic(true);
+                        polyline.startCap(new CustomCap(endCapIcon,8));
+                        if (line != null)
+                            line.remove();
+                        line = map.addPolyline(polyline);
+                        line.setColor(Color.BLUE);
+                        line.setWidth(10);
+                    }
+                };
+                task.execute(position);
+            }
+        });
         map.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
             @SuppressLint("StaticFieldLeak")
             @Override
