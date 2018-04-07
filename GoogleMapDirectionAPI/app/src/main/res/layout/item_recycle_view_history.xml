@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="80dp"
+    android:gravity="center_vertical"
+    >
+
+    <de.hdodenhof.circleimageview.CircleImageView
+        android:layout_width="56dp"
+        android:layout_height="56dp"
+        android:layout_margin="14dp"
+        android:id="@+id/image_tree"
+        android:src="@drawable/ic_big_pine_tree_shape"
+        />
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Name"
+        android:textSize="15sp"
+        android:textColor="#ff000000"
+        android:id="@+id/tv_detail"
+        android:layout_marginTop="14dp"
+        android:layout_toEndOf="@+id/image_tree"/>
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="10sp"
+        android:text="Detail"
+        android:textColor="#73ffffff"
+        android:layout_marginBottom="14dp"
+        android:id="@+id/tv_name_tree"
+        android:layout_toEndOf="@+id/image_tree"
+        android:layout_below="@+id/tv_detail"
+        android:gravity="center"/>
+
+</RelativeLayout>

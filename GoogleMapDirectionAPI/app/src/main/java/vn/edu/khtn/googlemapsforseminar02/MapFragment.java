@@ -17,25 +17,25 @@ import android.location.LocationManager;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Handler;
+import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.Button;
+import android.view.ViewGroup;
 import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
-import com.google.android.gms.maps.model.ButtCap;
-import com.google.android.gms.maps.model.CameraPosition;
-import com.google.android.gms.maps.model.Cap;
 import com.google.android.gms.maps.model.CustomCap;
 import com.google.android.gms.maps.model.JointType;
 import com.google.android.gms.maps.model.LatLng;
@@ -43,14 +43,14 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
-import com.google.android.gms.maps.model.RoundCap;
-import com.google.android.gms.maps.model.SquareCap;
 
 import java.util.ArrayList;
 
 import cn.fanrunqi.waveprogress.WaveProgressView;
 
-public class GGMapDirectionAPI extends AppCompatActivity implements OnMapReadyCallback, LocationListener{
+import static android.content.Context.LOCATION_SERVICE;
+
+public class MapFragment extends Fragment implements OnMapReadyCallback, LocationListener{
 
     private static final int REQUEST_ID_ACCESS_COURSE_FINE_LOCATION = 100;
     private static final String MYTAG = "MYTAG";
@@ -60,23 +60,25 @@ public class GGMapDirectionAPI extends AppCompatActivity implements OnMapReadyCa
     private GoogleMap map;
     private AsyncTask<Position, Void, Void> task;
     private WaveProgressView waveProgressView;
+    private FragmentActivity context;
+
+    @Nullable
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_ggmap_direction_api);
-        waveProgressView = findViewById(R.id.waveProgressbar);
+    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.fragment_map, container, false);
+        waveProgressView = view.findViewById(R.id.waveProgressbar);
         waveProgressView.setCurrent(55,"");
         waveProgressView.setMaxProgress(100);
         waveProgressView.setText("#FFFF00", 40);
         waveProgressView.setWaveColor("#5b9ef4"); //"#5b9ef4"
         waveProgressView.setWave(5, 20);
         waveProgressView.setmWaveSpeed(10);//The larger the value, the slower the vibration
-
-        SupportMapFragment mapFragment = ((SupportMapFragment) getSupportFragmentManager()
+        context = getActivity();
+        SupportMapFragment mapFragment = ((SupportMapFragment) getChildFragmentManager()
                 .findFragmentById(R.id.mapDirection));
         mapFragment.getMapAsync(this);
+        return view;
     }
-
 
     public String makeURL (String sourcelat, String sourcelng, String destlat, String destlng ){
         StringBuilder urlString = new StringBuilder();
@@ -106,7 +108,7 @@ public class GGMapDirectionAPI extends AppCompatActivity implements OnMapReadyCa
     }
 
     private String getEnabledLocationProvider() {
-        LocationManager locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
+        LocationManager locationManager = (LocationManager) context.getSystemService(LOCATION_SERVICE);
         // Tiêu chí để tìm một nhà cung cấp vị trí.
         Criteria criteria = new Criteria();
 
@@ -117,7 +119,7 @@ public class GGMapDirectionAPI extends AppCompatActivity implements OnMapReadyCa
         boolean enabled = locationManager.isProviderEnabled(bestProvider);
 
         if (!enabled) {
-            Toast.makeText(this, "No location provider enabled!", Toast.LENGTH_LONG).show();
+            Toast.makeText(context, "No location provider enabled!", Toast.LENGTH_LONG).show();
             Log.i(MYTAG, "No location provider enabled!");
             return null;
         }
@@ -125,7 +127,7 @@ public class GGMapDirectionAPI extends AppCompatActivity implements OnMapReadyCa
     }
 
     private Location getMyLocation() {
-        LocationManager locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
+        LocationManager locationManager = (LocationManager) context.getSystemService(LOCATION_SERVICE);
         String locationProvider = this.getEnabledLocationProvider();
         Log.d(MYTAG, "test");
         if (locationProvider == null) {
@@ -150,7 +152,7 @@ public class GGMapDirectionAPI extends AppCompatActivity implements OnMapReadyCa
         }
         // Với Android API >= 23 phải catch SecurityException.
         catch (SecurityException e) {
-            Toast.makeText(this, "Show My Location Error: " + e.getMessage(), Toast.LENGTH_LONG).show();
+            Toast.makeText(context, "Show My Location Error: " + e.getMessage(), Toast.LENGTH_LONG).show();
             Log.e(MYTAG, "Show My Location Error:" + e.getMessage());
             e.printStackTrace();
             return null;
@@ -161,7 +163,7 @@ public class GGMapDirectionAPI extends AppCompatActivity implements OnMapReadyCa
         MarkerOptions option = new MarkerOptions();
         option.position(position);
         option.title("Cây thông").snippet("Tôi thiếu nước. Hãy tưới cho tôi");
-        option.icon(bitmapDescriptorFromVector(this, iconID));
+        option.icon(bitmapDescriptorFromVector(context, iconID));
         option.alpha(alpha);
         option.rotation(0);
         return map.addMarker(option);
@@ -217,7 +219,7 @@ public class GGMapDirectionAPI extends AppCompatActivity implements OnMapReadyCa
                         // TODO Auto-generated method stub
                         super.onPostExecute(result);
                         int arrowColor = Color.BLUE;
-                        BitmapDescriptor endCapIcon = getEndCapIcon(GGMapDirectionAPI.this, arrowColor);
+                        BitmapDescriptor endCapIcon = getEndCapIcon(context, arrowColor);
                         polyline.addAll(listStep);
                         polyline.jointType(JointType.ROUND);
                         polyline.geodesic(true);
@@ -265,7 +267,7 @@ public class GGMapDirectionAPI extends AppCompatActivity implements OnMapReadyCa
                         // TODO Auto-generated method stub
                         super.onPostExecute(result);
                         int arrowColor = Color.BLUE;
-                        BitmapDescriptor endCapIcon = getEndCapIcon(GGMapDirectionAPI.this, arrowColor);
+                        BitmapDescriptor endCapIcon = getEndCapIcon(context, arrowColor);
                         polyline.addAll(listStep);
                         polyline.jointType(JointType.ROUND);
                         polyline.geodesic(true);
@@ -283,15 +285,15 @@ public class GGMapDirectionAPI extends AppCompatActivity implements OnMapReadyCa
         });
         map.setMapType(GoogleMap.MAP_TYPE_NORMAL);
         map.getUiSettings().setZoomControlsEnabled(true);
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
-                != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
-                this, Manifest.permission.ACCESS_COARSE_LOCATION)
+        if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(context,
+                Manifest.permission.ACCESS_COARSE_LOCATION)
                 != PackageManager.PERMISSION_GRANTED) {
             if (Build.VERSION.SDK_INT >= 23) {
                 int accessCoarsePermission
-                        = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION);
+                        = ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION);
                 int accessFinePermission
-                        = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION);
+                        = ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION);
                 if (accessCoarsePermission != PackageManager.PERMISSION_GRANTED
                         || accessFinePermission != PackageManager.PERMISSION_GRANTED) {
 
@@ -300,7 +302,7 @@ public class GGMapDirectionAPI extends AppCompatActivity implements OnMapReadyCa
                             Manifest.permission.ACCESS_FINE_LOCATION};
 
                     // Hiển thị một Dialog hỏi người dùng cho phép các quyền trên.
-                    ActivityCompat.requestPermissions(this, permissions,
+                    ActivityCompat.requestPermissions(context, permissions,
                             REQUEST_ID_ACCESS_COURSE_FINE_LOCATION);
 
                     return;
@@ -348,14 +350,14 @@ public class GGMapDirectionAPI extends AppCompatActivity implements OnMapReadyCa
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED
                         && grantResults[1] == PackageManager.PERMISSION_GRANTED) {
 
-                    Toast.makeText(this, "Permission granted!", Toast.LENGTH_LONG).show();
+                    Toast.makeText(context, "Permission granted!", Toast.LENGTH_LONG).show();
 
                     // Hiển thị vị trí hiện thời trên bản đồ.
                     this.showMyLocation();
                 }
                 // Hủy bỏ hoặc từ chối.
                 else {
-                    Toast.makeText(this, "Permission denied!", Toast.LENGTH_LONG).show();
+                    Toast.makeText(context, "Permission denied!", Toast.LENGTH_LONG).show();
                 }
                 break;
             }
@@ -368,7 +370,7 @@ public class GGMapDirectionAPI extends AppCompatActivity implements OnMapReadyCa
             LatLng latLng = new LatLng(myLocation.getLatitude(), myLocation.getLongitude());
             map.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 17));
         } else {
-            Toast.makeText(this, "Location not found!", Toast.LENGTH_LONG).show();
+            Toast.makeText(context, "Location not found!", Toast.LENGTH_LONG).show();
             Log.i(MYTAG, "Location not found");
         }
     }
