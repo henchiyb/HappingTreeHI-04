@@ -14,20 +14,18 @@ import de.hdodenhof.circleimageview.CircleImageView;
  */
 
 public class HistoryViewHolder extends RecyclerView.ViewHolder {
-    @BindView(R.id.image_tree) CircleImageView imageView;
-    @BindView(R.id.tv_detail) TextView tvNameTree;
-    @BindView(R.id.tv_name_tree) TextView tvDetail;
+    private CircleImageView imageView;
+    private TextView tvNameTree;
+    private TextView tvDetail;
     public HistoryViewHolder(View itemView) {
         super(itemView);
-        ButterKnife.bind(this, itemView);
+        imageView = itemView.findViewById(R.id.image_tree);
+        tvDetail = itemView.findViewById(R.id.tv_name_tree);
+        tvNameTree = itemView.findViewById(R.id.tv_detail);
     }
 
     public void setData(Position position){
-        Picasso.with(itemView.getContext())
-                .load(R.drawable.ic_big_pine_tree_shape)
-                .fit()
-                .centerCrop()
-                .into(imageView);
+        imageView.setImageResource(R.drawable.ic_big_pine_tree_shape);
         tvDetail.setText("DES LAT: " + position.getDesLat());
         tvNameTree.setText("DES LONG: " + position.getDesIng());
         itemView.setTag(position);

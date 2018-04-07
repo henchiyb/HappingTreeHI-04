@@ -1,7 +1,5 @@
 package vn.edu.khtn.googlemapsforseminar02;
 
-import android.content.Context;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
@@ -14,13 +12,8 @@ import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
-
 public class HistoryFragment extends Fragment implements View.OnClickListener {
-
-    // TODO: Rename and change types of parameters
-    @BindView(R.id.recycle_view_history) RecyclerView recyclerView;
+    private RecyclerView recyclerView;
 
     private HistoryViewAdapter adapter;
     private ArrayList<Position> listPositions;
@@ -30,7 +23,7 @@ public class HistoryFragment extends Fragment implements View.OnClickListener {
                              Bundle savedInstanceState) {
 
         View view = inflater.inflate(R.layout.fragment_history, container, false);
-        ButterKnife.bind(this, view);
+        recyclerView = view.findViewById(R.id.recycle_view_history);
         LinearLayoutManager layoutManager = new LinearLayoutManager(view.getContext());
         recyclerView.setLayoutManager(layoutManager);
         listPositions = new ArrayList<>();

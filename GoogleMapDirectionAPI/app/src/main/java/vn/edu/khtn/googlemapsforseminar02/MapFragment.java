@@ -61,6 +61,13 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, Locatio
     private AsyncTask<Position, Void, Void> task;
     private WaveProgressView waveProgressView;
     private FragmentActivity context;
+    private ArrayList<Marker> listMarker;
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        listMarker = new ArrayList<>();
+    }
 
     @Nullable
     @Override
@@ -92,6 +99,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, Locatio
         urlString.append(",");
         urlString.append(destlng);
         urlString.append("&mode=walking");
+        urlString.append("&sensor=false");
         urlString.append("&key="+getResources().getString(R.string.google_api_key));
         return urlString.toString();
     }
@@ -166,35 +174,38 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, Locatio
         option.icon(bitmapDescriptorFromVector(context, iconID));
         option.alpha(alpha);
         option.rotation(0);
-        return map.addMarker(option);
+        Marker marker = map.addMarker(option);
+        listMarker.add(marker);
+        return marker;
     }
     @Override
     public void onMapReady(GoogleMap googleMap) {
         this.map = googleMap;
-        LatLng haYen = new LatLng(21.0207512, 105.7938957);
-        LatLng layNuoc = new LatLng(21.030754, 105.7938977);
-        LatLng PhoDiBoNguyenHue = new LatLng(10.774467, 106.703274);
+        if (listMarker.size() == 0) {
+            LatLng haYen = new LatLng(21.0207512, 105.7938957);
+            LatLng layNuoc = new LatLng(21.030754, 105.7938977);
+            LatLng PhoDiBoNguyenHue = new LatLng(10.774467, 106.703274);
 
-        Marker maker = createTreeMarker(haYen, R.drawable.ic_tree_with_three_circles_of_foliage, 1.0f);
-        new Handler().postDelayed(new AnimateMarker(maker, 0.5F, 0.1F), 50);
-        maker.showInfoWindow();
+            Marker maker = createTreeMarker(haYen, R.drawable.ic_tree_with_three_circles_of_foliage, 1.0f);
+            new Handler().postDelayed(new AnimateMarker(maker, 0.5F, 0.1F), 50);
+            maker.showInfoWindow();
 
-        final Marker makerWater = createTreeMarker(layNuoc, R.drawable.ic_tree_with_three_circles_of_foliage, 1.0f);
+            final Marker makerWater = createTreeMarker(layNuoc, R.drawable.ic_tree_with_three_circles_of_foliage, 1.0f);
 
-        new Handler().postDelayed(new AnimateMarker(makerWater, 0.5F, 0.1F), 50);
-        makerWater.showInfoWindow();
+            new Handler().postDelayed(new AnimateMarker(makerWater, 0.5F, 0.1F), 50);
+            makerWater.showInfoWindow();
 
-        Marker maker2 = createTreeMarker(PhoDiBoNguyenHue, R.drawable.ic_big_pine_tree_shape, 1.0f);
-        maker2.showInfoWindow();
-
+            Marker maker2 = createTreeMarker(PhoDiBoNguyenHue, R.drawable.ic_big_pine_tree_shape, 1.0f);
+            maker2.showInfoWindow();
+        }
         waveProgressView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 listStep = new ArrayList<LatLng>();
                 polyline = new PolylineOptions();
                 Position position = new Position();
-                position.setDesLat(Double.toString(makerWater.getPosition().latitude));
-                position.setDesIng(Double.toString(makerWater.getPosition().longitude));
+                position.setDesLat(Double.toString(listMarker.get(1).getPosition().latitude));
+                position.setDesIng(Double.toString(listMarker.get(1).getPosition().longitude));
 
                 task = new AsyncTask<Position, Void, Void>() {
 
