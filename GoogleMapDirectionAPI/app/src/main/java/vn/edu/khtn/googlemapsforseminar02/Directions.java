@@ -106,12 +106,25 @@ public class Directions {
 
         }
 
-        public static final class Step {
+        public static final class Poly {
+            public final String points;
+
+            public Poly(String points) {
+                this.points = points;
+            }
+
+            public String getPoints() {
+                return points;
+            }
+        }
+
+            public static final class Step {
             public final End_location end_location;
             public final String html_instructions;
             public final Start_location start_location;
             public final String travel_mode;
             public final String maneuver;
+            public final Poly polyline;
 
 
             public End_location getEnd_location() {
@@ -137,13 +150,18 @@ public class Directions {
                 return maneuver;
             }
 
-            public Step(End_location end_location, String html_instructions, Start_location start_location, String travel_mode, String maneuver) {
+            public Step(End_location end_location, String html_instructions, Start_location start_location, String travel_mode, String maneuver, Poly polyline) {
                 this.end_location = end_location;
                 this.html_instructions = html_instructions;
                 this.start_location = start_location;
                 this.travel_mode = travel_mode;
                 this.maneuver = maneuver;
+                this.polyline = polyline;
             }
-        }
+
+                public Poly getPolyline() {
+                    return polyline;
+                }
+            }
     }
 }

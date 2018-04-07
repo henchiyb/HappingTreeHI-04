@@ -8,6 +8,14 @@ public class Position {
     private String desLat;
     private String desIng;
 
+    public Position(String desLat, String desIng) {
+        this.desLat = desLat;
+        this.desIng = desIng;
+    }
+
+    public Position() {
+    }
+
     public String getDesLat() {
         return desLat;
     }

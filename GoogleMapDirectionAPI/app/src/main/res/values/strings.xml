@@ -1,7 +1,17 @@
-
 <resources>
-    <string name="app_name">GoogleMapsForSeminar02</string>
+    <string name="app_name">Happy Tree</string>
     <string name="google_api_key">AIzaSyBf4GS88KSkAAInkzVlTi4yyAyQf3EwdTo</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="title_activity_main">MainActivity</string>
+
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+
+    <string name="action_settings">Settings</string>
+
 </resources>
+
 
 
