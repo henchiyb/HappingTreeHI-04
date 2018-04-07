@@ -38,16 +38,21 @@ public class MainActivity extends AppCompatActivity
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
         mapFragment = new MapFragment();
-        openFragment(mapFragment);
+        openFragment(mapFragment, false);
     }
 
-    private void openFragment(Fragment fragment){
+    private void openFragment(Fragment fragment, boolean addToBackStack){
         curentFragment = fragment;
         FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
         fragmentTransaction.setCustomAnimations(R.anim.slide_out_down, 0, 0, R.anim.slide_in_up);
-        fragmentTransaction.replace(R.id.container, fragment)
-                .addToBackStack(fragment.getClass().getName())
-                .commit();
+        if (addToBackStack) {
+            fragmentTransaction.replace(R.id.container, fragment)
+                    .addToBackStack(fragment.getClass().getName())
+                    .commit();
+        }else {
+            fragmentTransaction.replace(R.id.container, fragment)
+                    .commit();
+        }
     }
 
     public void showAlertDialog(String title, String detail){
@@ -87,17 +92,17 @@ public class MainActivity extends AppCompatActivity
     public boolean onNavigationItemSelected(MenuItem item) {
         // Handle navigation view item clicks here.
         int id = item.getItemId();
-
          if (id == R.id.nav_map) {
              if (!(curentFragment instanceof MapFragment)) {
-                 openFragment(mapFragment);
+                 openFragment(mapFragment, false);
              }
         } else if (id == R.id.nav_history) {
              if (!(curentFragment instanceof HistoryFragment)) {
                  Fragment fragmentHistory = new HistoryFragment();
-                 openFragment(fragmentHistory);
+                 openFragment(fragmentHistory, true);
              }
         }
+        item.setChecked(true);
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
