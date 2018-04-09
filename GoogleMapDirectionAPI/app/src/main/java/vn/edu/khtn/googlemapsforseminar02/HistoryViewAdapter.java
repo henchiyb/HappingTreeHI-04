@@ -12,10 +12,10 @@ import java.util.List;
  */
 
 public class HistoryViewAdapter extends RecyclerView.Adapter<HistoryViewHolder> {
-    private List<Position> positions;
+    private List<HistoryObject> historyObjects;
 
-    public HistoryViewAdapter(List<Position> positions) {
-        this.positions = positions;
+    public HistoryViewAdapter(List<HistoryObject> historyObjects) {
+        this.historyObjects = historyObjects;
     }
 
     private View.OnClickListener onItemClickListener;
@@ -33,12 +33,12 @@ public class HistoryViewAdapter extends RecyclerView.Adapter<HistoryViewHolder> 
 
     @Override
     public void onBindViewHolder(HistoryViewHolder holder, int position) {
-        holder.setData(positions.get(position));
+        holder.setData(historyObjects.get(position));
         holder.itemView.setOnClickListener(onItemClickListener);
     }
 
     @Override
     public int getItemCount() {
-        return positions.size();
+        return historyObjects.size();
     }
 }

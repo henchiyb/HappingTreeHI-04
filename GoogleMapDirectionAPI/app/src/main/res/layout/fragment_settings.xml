@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="General"
+        android:padding="@dimen/activity_horizontal_margin"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:textColor="@color/colorPrimary"/>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginLeft="@dimen/activity_horizontal_margin"
+        android:layout_marginRight="@dimen/activity_horizontal_margin"
+        android:background="@color/colorPrimaryDark"/>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Hướng dẫn bằng giọng nói"
+            android:padding="@dimen/activity_horizontal_margin"
+            android:textSize="16sp"
+            android:layout_centerVertical="true"
+            android:textColor="#000000"/>
+
+        <ToggleButton
+            android:layout_width="70dp"
+            android:layout_height="40dp"
+            android:layout_margin="@dimen/activity_horizontal_margin"
+            android:background="@drawable/custom_toggle"
+            android:textOff=""
+            android:textOn=""
+            android:layout_alignParentRight="true"
+            android:id="@+id/toggle_voice"
+            />
+
+    </RelativeLayout>
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Âm thanh"
+            android:padding="@dimen/activity_horizontal_margin"
+            android:textSize="16sp"
+            android:layout_centerVertical="true"
+            android:textColor="#000000"/>
+
+        <ToggleButton
+            android:layout_width="70dp"
+            android:layout_height="40dp"
+            android:layout_margin="@dimen/activity_horizontal_margin"
+            android:background="@drawable/custom_toggle"
+            android:textOff=""
+            android:textOn=""
+            android:layout_alignParentRight="true"
+            android:id="@+id/toggle_music"
+            />
+
+    </RelativeLayout>
+
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Reminder"
+        android:padding="@dimen/activity_horizontal_margin"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:textColor="@color/colorPrimary"/>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/colorPrimaryDark"
+        android:layout_marginLeft="@dimen/activity_horizontal_margin"
+        android:layout_marginRight="@dimen/activity_horizontal_margin"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Enable timer"
+                android:padding="@dimen/activity_horizontal_margin"
+                android:textSize="16sp"
+                android:layout_centerVertical="true"
+                android:textColor="#000000"/>
+
+            <ToggleButton
+                android:layout_width="70dp"
+                android:layout_height="40dp"
+                android:layout_margin="@dimen/activity_horizontal_margin"
+                android:background="@drawable/custom_toggle"
+                android:textOff=""
+                android:textOn=""
+                android:layout_alignParentRight="true"
+                android:id="@+id/toggle_timer"
+                />
+
+        </RelativeLayout>
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingRight="@dimen/activity_horizontal_margin"
+            android:id="@+id/view_time_reminder">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Time reminder"
+                android:padding="@dimen/activity_horizontal_margin"
+                android:textSize="16sp"
+                android:layout_centerVertical="true"
+                android:textColor="#000000"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:gravity="center"
+                android:layout_height="wrap_content"
+                android:text="12:00"
+                android:id="@+id/tv_reminder"
+                android:padding="@dimen/activity_horizontal_margin"
+                android:layout_alignParentRight="true"
+                android:textSize="16sp"
+                android:layout_centerVertical="true"
+                android:textColor="#767676"/>
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingRight="@dimen/activity_horizontal_margin"
+            android:id="@+id/view_repeat">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Repeat"
+                android:padding="@dimen/activity_horizontal_margin"
+                android:textSize="16sp"
+                android:layout_centerVertical="true"
+                android:textColor="#000000"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:gravity="center"
+                android:layout_height="wrap_content"
+                android:text="Everyday"
+                android:id="@+id/tv_repeat"
+                android:padding="@dimen/activity_horizontal_margin"
+                android:layout_alignParentRight="true"
+                android:textSize="16sp"
+                android:layout_centerVertical="true"
+                android:textColor="#767676"/>
+        </RelativeLayout>
+
+    </LinearLayout>
+
+</LinearLayout>

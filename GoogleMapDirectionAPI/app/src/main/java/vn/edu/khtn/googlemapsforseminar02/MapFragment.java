@@ -3,11 +3,13 @@ package vn.edu.khtn.googlemapsforseminar02;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Matrix;
+import android.graphics.Point;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.location.Criteria;
@@ -22,6 +24,7 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -30,6 +33,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
+import com.github.amlcurran.showcaseview.ShowcaseView;
+import com.github.amlcurran.showcaseview.targets.ActionItemTarget;
+import com.github.amlcurran.showcaseview.targets.ActionViewTarget;
+import com.github.amlcurran.showcaseview.targets.Target;
+import com.github.amlcurran.showcaseview.targets.ViewTarget;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -178,119 +186,268 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, Locatio
         listMarker.add(marker);
         return marker;
     }
+    private Marker makerWater;
     @Override
     public void onMapReady(GoogleMap googleMap) {
         this.map = googleMap;
         if (listMarker.size() == 0) {
             LatLng haYen = new LatLng(21.0207512, 105.7938957);
             LatLng layNuoc = new LatLng(21.030754, 105.7938977);
-            LatLng PhoDiBoNguyenHue = new LatLng(10.774467, 106.703274);
+            LatLng PhoDiBoNguyenHue = new LatLng(21.0228512, 105.7938957);
 
             Marker maker = createTreeMarker(haYen, R.drawable.ic_tree_with_three_circles_of_foliage, 1.0f);
-            new Handler().postDelayed(new AnimateMarker(maker, 0.5F, 0.1F), 50);
+            new Handler().postDelayed(new AnimateMarker(maker, 0.1F, 0.1F), 50);
             maker.showInfoWindow();
 
-            final Marker makerWater = createTreeMarker(layNuoc, R.drawable.ic_tree_with_three_circles_of_foliage, 1.0f);
-
-            new Handler().postDelayed(new AnimateMarker(makerWater, 0.5F, 0.1F), 50);
-            makerWater.showInfoWindow();
+            makerWater = createTreeMarker(layNuoc, R.drawable.ic_add_water_black_24dp, 1.0f);
+            Handler handlerWater = new Handler();
+            handlerWater.postDelayed(new AnimateMarker(makerWater, 1, 0.5F, 0.1F), 50);
 
             Marker maker2 = createTreeMarker(PhoDiBoNguyenHue, R.drawable.ic_big_pine_tree_shape, 1.0f);
-            maker2.showInfoWindow();
         }
         waveProgressView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                listStep = new ArrayList<LatLng>();
-                polyline = new PolylineOptions();
-                Position position = new Position();
-                position.setDesLat(Double.toString(listMarker.get(1).getPosition().latitude));
-                position.setDesIng(Double.toString(listMarker.get(1).getPosition().longitude));
-
-                task = new AsyncTask<Position, Void, Void>() {
-
+                SoundEffects.getInstance(context).playSoundClick();
+                AlertDialog.Builder builder = new AlertDialog.Builder(context);
+                builder.setTitle("Lấy nước");
+                builder.setIcon(R.drawable.ic_add_water_black_24dp);
+                builder.setMessage("Bạn có muốn đi lấy thêm nước không ?");
+                builder.setCancelable(false);
+                builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
                     @Override
-                    protected Void doInBackground(Position... params) {
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        SoundEffects.getInstance(context).playSoundClick();
+                        Toast.makeText(context, "Bắt đàu di chuyển để lấy nước", Toast.LENGTH_SHORT).show();
+                        listStep = new ArrayList<LatLng>();
+                        polyline = new PolylineOptions();
+                        Position position = new Position();
+                        position.setDesLat(Double.toString(listMarker.get(1).getPosition().latitude));
+                        position.setDesIng(Double.toString(listMarker.get(1).getPosition().longitude));
+                        task = new AsyncTask<Position, Void, Void>() {
 
-                        // Ha Yen : 21.0207512, 105.7938957
-                        Location location = getMyLocation();
-                        String request = makeURL(location.getLatitude()+"", location.getLongitude()+"",
-                                params[0].getDesLat(), params[0].getDesIng());
-                        Log.d("Test URL: ", request);
-                        GetDirectionsTask task = new GetDirectionsTask(request);
-                        ArrayList<LatLng> list = task.testDirection();
-                        for (LatLng latLng : list) {
-                            listStep.add(latLng);
-                        }
-                        return null;
+                            @Override
+                            protected Void doInBackground(Position... params) {
+
+                                // Ha Yen : 21.0207512, 105.7938957
+                                Location location = getMyLocation();
+                                String request = makeURL(location.getLatitude()+"", location.getLongitude()+"",
+                                        params[0].getDesLat(), params[0].getDesIng());
+                                Log.d("Test URL: ", request);
+                                GetDirectionsTask task = new GetDirectionsTask(request);
+                                ArrayList<LatLng> list = task.testDirection();
+                                for (LatLng latLng : list) {
+                                    listStep.add(latLng);
+                                }
+                                return null;
+                            }
+
+                            @Override
+                            protected void onPostExecute(Void result) {
+                                // TODO Auto-generated method stub
+                                super.onPostExecute(result);
+                                int arrowColor = Color.BLUE;
+                                BitmapDescriptor endCapIcon = getEndCapIcon(context, arrowColor);
+                                polyline.addAll(listStep);
+                                polyline.jointType(JointType.ROUND);
+                                polyline.geodesic(true);
+                                polyline.startCap(new CustomCap(endCapIcon,8));
+                                if (line != null)
+                                    line.remove();
+                                line = map.addPolyline(polyline);
+                                line.setColor(Color.BLUE);
+                                line.setWidth(10);
+                            }
+                        };
+                        task.execute(position);
                     }
-
+                });
+                builder.setNegativeButton("Thoát", new DialogInterface.OnClickListener() {
                     @Override
-                    protected void onPostExecute(Void result) {
-                        // TODO Auto-generated method stub
-                        super.onPostExecute(result);
-                        int arrowColor = Color.BLUE;
-                        BitmapDescriptor endCapIcon = getEndCapIcon(context, arrowColor);
-                        polyline.addAll(listStep);
-                        polyline.jointType(JointType.ROUND);
-                        polyline.geodesic(true);
-                        polyline.startCap(new CustomCap(endCapIcon,8));
-                        if (line != null)
-                            line.remove();
-                        line = map.addPolyline(polyline);
-                        line.setColor(Color.BLUE);
-                        line.setWidth(10);
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        SoundEffects.getInstance(context).playSoundClick();
+                        dialogInterface.dismiss();
                     }
-                };
-                task.execute(position);
+                });
+                AlertDialog alertDialog = builder.create();
+                alertDialog.show();
+
             }
         });
         map.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
             @SuppressLint("StaticFieldLeak")
             @Override
-            public boolean onMarkerClick(Marker marker) {
-                listStep = new ArrayList<LatLng>();
-                polyline = new PolylineOptions();
-                Position position = new Position();
-                position.setDesLat(Double.toString(marker.getPosition().latitude));
-                position.setDesIng(Double.toString(marker.getPosition().longitude));
+            public boolean onMarkerClick(final Marker marker) {
+                if (marker != makerWater) {
+                    if ((marker.getAlpha() == 1.0f && listMarker.get(0).getAlpha() == 1.0f) || marker.getAlpha() < 1.0f) {
+                        SoundEffects.getInstance(context).playSoundClick();
+                        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+                        LayoutInflater factory = LayoutInflater.from(context);
+                        final View view = factory.inflate(R.layout.dialog_layout, null);
+                        builder.setView(view);
+                        builder.setTitle("Tưới cây");
+                        builder.setIcon(R.drawable.ic_tree_with_three_circles_of_foliage);
+                        builder.setCancelable(false);
+                        builder.setPositiveButton("Tưới nước", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                SoundEffects.getInstance(context).playSoundClick();
+                                Toast.makeText(context, "Bắt đàu di chuyển để tưới", Toast.LENGTH_SHORT).show();
+                                for (int j = 0; j < listMarker.size(); j++) {
+                                    listMarker.get(j).setAlpha(0.2F);
+                                }
+                                marker.setAlpha(1.0f);
+                                listStep = new ArrayList<LatLng>();
+                                polyline = new PolylineOptions();
+                                Position position = new Position();
+                                position.setDesLat(Double.toString(marker.getPosition().latitude));
+                                position.setDesIng(Double.toString(marker.getPosition().longitude));
+                                task = new AsyncTask<Position, Void, Void>() {
 
-                 task = new AsyncTask<Position, Void, Void>() {
+                                    @Override
+                                    protected Void doInBackground(Position... params) {
 
-                    @Override
-                    protected Void doInBackground(Position... params) {
+                                        // Ha Yen : 21.0207512, 105.7938957
+                                        Location location = getMyLocation();
+                                        String request = makeURL(location.getLatitude() + "", location.getLongitude() + "",
+                                                params[0].getDesLat(), params[0].getDesIng());
+                                        Log.d("Test URL: ", request);
+                                        GetDirectionsTask task = new GetDirectionsTask(request);
+                                        ArrayList<LatLng> list = task.testDirection();
+                                        for (LatLng latLng : list) {
+                                            listStep.add(latLng);
+                                        }
+                                        return null;
+                                    }
 
-                        // Ha Yen : 21.0207512, 105.7938957
-                        Location location = getMyLocation();
-                        String request = makeURL(location.getLatitude()+"", location.getLongitude()+"",
-                                params[0].getDesLat(), params[0].getDesIng());
-                        Log.d("Test URL: ", request);
-                        GetDirectionsTask task = new GetDirectionsTask(request);
-                        ArrayList<LatLng> list = task.testDirection();
-                        for (LatLng latLng : list) {
-                            listStep.add(latLng);
+                                    @Override
+                                    protected void onPostExecute(Void result) {
+                                        // TODO Auto-generated method stub
+                                        super.onPostExecute(result);
+                                        int arrowColor = Color.BLUE;
+                                        BitmapDescriptor endCapIcon = getEndCapIcon(context, arrowColor);
+                                        polyline.addAll(listStep);
+                                        polyline.jointType(JointType.ROUND);
+                                        polyline.geodesic(true);
+                                        polyline.startCap(new CustomCap(endCapIcon, 8));
+                                        if (line != null)
+                                            line.remove();
+                                        line = map.addPolyline(polyline);
+                                        line.setColor(Color.BLUE);
+                                        line.setWidth(10);
+                                    }
+                                };
+                                task.execute(position);
+                            }
+                        });
+                        builder.setNegativeButton("Thoát", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                SoundEffects.getInstance(context).playSoundClick();
+                                dialogInterface.dismiss();
+                            }
+                        });
+                        AlertDialog alertDialog = builder.create();
+                        alertDialog.show();
+                    } else {
+                        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+                        LayoutInflater factory = LayoutInflater.from(context);
+                        final View view = factory.inflate(R.layout.dialog_layout, null);
+                        builder.setView(view);
+                        builder.setTitle("Xác nhận tưới cây");
+                        builder.setIcon(R.drawable.ic_tree_with_three_circles_of_foliage);
+                        builder.setCancelable(false);
+                        builder.setPositiveButton("Đã tưới", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+//                            SoundEffects.getInstance(context).playSoundClick();
+                                synchronized (waveProgressView) {
+                                    waveProgressView.setCurrent(30, "");
+                                    waveProgressView.setWaveColor("#D80027");
+                                    waveProgressView.notify();
+                                }
+
+                            }
+                        });
+                        builder.setNegativeButton("Chưa tưới", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                SoundEffects.getInstance(context).playSoundClick();
+                                dialogInterface.dismiss();
+                            }
+                        });
+                        AlertDialog alertDialog = builder.create();
+                        alertDialog.show();
+                    }
+                } else {
+                    SoundEffects.getInstance(context).playSoundClick();
+                    AlertDialog.Builder builder = new AlertDialog.Builder(context);
+                    builder.setTitle("Lấy nước");
+                    builder.setIcon(R.drawable.ic_tree_with_three_circles_of_foliage);
+                    builder.setMessage("Bạn có muốn lấy nước không? ");
+                    builder.setCancelable(false);
+                    builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            SoundEffects.getInstance(context).playSoundClick();
+                            Toast.makeText(context, "Bắt đàu di chuyển để lấy nước", Toast.LENGTH_SHORT).show();
+                            for (int j = 0; j < listMarker.size(); j++) {
+                                listMarker.get(j).setAlpha(0.2F);
+                            }
+                            marker.setAlpha(1.0f);
+                            listStep = new ArrayList<LatLng>();
+                            polyline = new PolylineOptions();
+                            Position position = new Position();
+                            position.setDesLat(Double.toString(marker.getPosition().latitude));
+                            position.setDesIng(Double.toString(marker.getPosition().longitude));
+                            task = new AsyncTask<Position, Void, Void>() {
+
+                                @Override
+                                protected Void doInBackground(Position... params) {
+
+                                    // Ha Yen : 21.0207512, 105.7938957
+                                    Location location = getMyLocation();
+                                    String request = makeURL(location.getLatitude() + "", location.getLongitude() + "",
+                                            params[0].getDesLat(), params[0].getDesIng());
+                                    Log.d("Test URL: ", request);
+                                    GetDirectionsTask task = new GetDirectionsTask(request);
+                                    ArrayList<LatLng> list = task.testDirection();
+                                    for (LatLng latLng : list) {
+                                        listStep.add(latLng);
+                                    }
+                                    return null;
+                                }
+
+                                @Override
+                                protected void onPostExecute(Void result) {
+                                    // TODO Auto-generated method stub
+                                    super.onPostExecute(result);
+                                    int arrowColor = Color.BLUE;
+                                    BitmapDescriptor endCapIcon = getEndCapIcon(context, arrowColor);
+                                    polyline.addAll(listStep);
+                                    polyline.jointType(JointType.ROUND);
+                                    polyline.geodesic(true);
+                                    polyline.startCap(new CustomCap(endCapIcon, 8));
+                                    if (line != null)
+                                        line.remove();
+                                    line = map.addPolyline(polyline);
+                                    line.setColor(Color.BLUE);
+                                    line.setWidth(10);
+                                }
+                            };
+                            task.execute(position);
                         }
-                        return null;
-                    }
-
-                    @Override
-                    protected void onPostExecute(Void result) {
-                        // TODO Auto-generated method stub
-                        super.onPostExecute(result);
-                        int arrowColor = Color.BLUE;
-                        BitmapDescriptor endCapIcon = getEndCapIcon(context, arrowColor);
-                        polyline.addAll(listStep);
-                        polyline.jointType(JointType.ROUND);
-                        polyline.geodesic(true);
-                        polyline.startCap(new CustomCap(endCapIcon,8));
-                        if (line != null)
-                            line.remove();
-                        line = map.addPolyline(polyline);
-                        line.setColor(Color.BLUE);
-                        line.setWidth(10);
-                    }
-                };
-                task.execute(position);
+                    });
+                    builder.setNegativeButton("Thoát", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            SoundEffects.getInstance(context).playSoundClick();
+                            dialogInterface.dismiss();
+                        }
+                    });
+                    AlertDialog alertDialog = builder.create();
+                    alertDialog.show();
+                }
                 return false;
             }
         });
