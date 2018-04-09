@@ -9,7 +9,6 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Matrix;
-import android.graphics.Point;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.location.Criteria;
@@ -25,7 +24,6 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -33,11 +31,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
-import com.github.amlcurran.showcaseview.ShowcaseView;
-import com.github.amlcurran.showcaseview.targets.ActionItemTarget;
-import com.github.amlcurran.showcaseview.targets.ActionViewTarget;
-import com.github.amlcurran.showcaseview.targets.Target;
-import com.github.amlcurran.showcaseview.targets.ViewTarget;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -70,11 +63,17 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, Locatio
     private WaveProgressView waveProgressView;
     private FragmentActivity context;
     private ArrayList<Marker> listMarker;
+    private ArrayList<Marker> listMarkerCannotWater;
+    private ArrayList<Marker> listMarkerCanWater;
+    private ArrayList<Marker> listMarkerWater;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         listMarker = new ArrayList<>();
+        listMarkerCannotWater = new ArrayList<>();
+        listMarkerCanWater = new ArrayList<>();
+        listMarkerWater = new ArrayList<>();
     }
 
     @Nullable
@@ -82,7 +81,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, Locatio
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_map, container, false);
         waveProgressView = view.findViewById(R.id.waveProgressbar);
-        waveProgressView.setCurrent(55,"");
+        waveProgressView.setCurrent(80,"");
         waveProgressView.setMaxProgress(100);
         waveProgressView.setText("#FFFF00", 40);
         waveProgressView.setWaveColor("#5b9ef4"); //"#5b9ef4"
@@ -178,7 +177,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, Locatio
     private Marker createTreeMarker(LatLng position, int iconID, float alpha){
         MarkerOptions option = new MarkerOptions();
         option.position(position);
-        option.title("Cây thông").snippet("Tôi thiếu nước. Hãy tưới cho tôi");
         option.icon(bitmapDescriptorFromVector(context, iconID));
         option.alpha(alpha);
         option.rotation(0);
@@ -193,17 +191,25 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, Locatio
         if (listMarker.size() == 0) {
             LatLng haYen = new LatLng(21.0207512, 105.7938957);
             LatLng layNuoc = new LatLng(21.030754, 105.7938977);
-            LatLng PhoDiBoNguyenHue = new LatLng(21.0228512, 105.7938957);
+            LatLng haYen2 = new LatLng(21.0228512, 105.7938957);
 
             Marker maker = createTreeMarker(haYen, R.drawable.ic_tree_with_three_circles_of_foliage, 1.0f);
+            maker.setTitle("Cây bàng");
+            maker.setSnippet("Tôi thiếu nước. Hãy tưới cho tôi");
+            listMarkerCanWater.add(maker);
             new Handler().postDelayed(new AnimateMarker(maker, 0.1F, 0.1F), 50);
             maker.showInfoWindow();
 
             makerWater = createTreeMarker(layNuoc, R.drawable.ic_add_water_black_24dp, 1.0f);
+            listMarkerWater.add(makerWater);
+            makerWater.setTitle("Chỗ lấy nước");
             Handler handlerWater = new Handler();
             handlerWater.postDelayed(new AnimateMarker(makerWater, 1, 0.5F, 0.1F), 50);
 
-            Marker maker2 = createTreeMarker(PhoDiBoNguyenHue, R.drawable.ic_big_pine_tree_shape, 1.0f);
+            Marker maker2 = createTreeMarker(haYen2, R.drawable.ic_big_pine_tree_shape, 1.0f);
+            maker2.setTitle("Cây thông");
+            maker2.setSnippet("Tôi đã đủ nước rồi");
+            listMarkerCannotWater.add(maker2);
         }
         waveProgressView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -278,21 +284,164 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, Locatio
             @SuppressLint("StaticFieldLeak")
             @Override
             public boolean onMarkerClick(final Marker marker) {
-                if (marker != makerWater) {
-                    if ((marker.getAlpha() == 1.0f && listMarker.get(0).getAlpha() == 1.0f) || marker.getAlpha() < 1.0f) {
+                if (!listMarkerWater.contains(marker)) {
+                    if (listMarkerCanWater.contains(marker)) {
+                        if (marker.getAlpha() == 1.0f && polyline != null){
+                            AlertDialog.Builder builder = new AlertDialog.Builder(context);
+                            builder.setTitle("Xác nhận tưới cây");
+                            builder.setMessage("Bạn đã tưới cây này chưa ?");
+                            builder.setIcon(R.drawable.ic_tree_with_three_circles_of_foliage_green);
+                            builder.setCancelable(false);
+                            builder.setPositiveButton("Đã tưới", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialogInterface, int i) {
+                            SoundEffects.getInstance(context).playSoundClick();
+                            waveProgressView.setCurrent(30,"");
+                            waveProgressView.setMaxProgress(100);
+                            waveProgressView.setWaveColor("#D80027");
+                            waveProgressView.setWave(5, 20);
+                            waveProgressView.setmWaveSpeed(10);
+                            marker.setIcon(bitmapDescriptorFromVector(context,
+                                    R.drawable.ic_tree_with_three_circles_of_foliage_green));
+                            listMarkerCanWater.remove(marker);
+                            listMarkerCannotWater.add(marker);
+                                }
+                            });
+                            builder.setNegativeButton("Chưa tưới", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialogInterface, int i) {
+                                    SoundEffects.getInstance(context).playSoundClick();
+                                    dialogInterface.dismiss();
+                                }
+                            });
+                            AlertDialog alertDialog = builder.create();
+                            alertDialog.show();
+                        } else {
+                            SoundEffects.getInstance(context).playSoundClick();
+                            AlertDialog.Builder builder = new AlertDialog.Builder(context);
+                            LayoutInflater factory = LayoutInflater.from(context);
+                            final View view = factory.inflate(R.layout.dialog_layout, null);
+                            builder.setView(view);
+                            builder.setTitle("Tưới cây");
+                            builder.setIcon(R.drawable.ic_tree_with_three_circles_of_foliage);
+                            builder.setCancelable(false);
+                            builder.setPositiveButton("Tưới nước", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialogInterface, int i) {
+                                    SoundEffects.getInstance(context).playSoundClick();
+                                    Toast.makeText(context, "Bắt đầu di chuyển để tưới", Toast.LENGTH_SHORT).show();
+                                    for (int j = 0; j < listMarker.size(); j++) {
+                                        listMarker.get(j).setAlpha(0.2F);
+                                    }
+                                    marker.setAlpha(1.0f);
+                                    listStep = new ArrayList<LatLng>();
+                                    polyline = new PolylineOptions();
+                                    Position position = new Position();
+                                    position.setDesLat(Double.toString(marker.getPosition().latitude));
+                                    position.setDesIng(Double.toString(marker.getPosition().longitude));
+                                    task = new AsyncTask<Position, Void, Void>() {
+
+                                        @Override
+                                        protected Void doInBackground(Position... params) {
+
+                                            // Ha Yen : 21.0207512, 105.7938957
+                                            Location location = getMyLocation();
+                                            String request = makeURL(location.getLatitude() + "", location.getLongitude() + "",
+                                                    params[0].getDesLat(), params[0].getDesIng());
+                                            Log.d("Test URL: ", request);
+                                            GetDirectionsTask task = new GetDirectionsTask(request);
+                                            ArrayList<LatLng> list = task.testDirection();
+                                            for (LatLng latLng : list) {
+                                                listStep.add(latLng);
+                                            }
+                                            return null;
+                                        }
+
+                                        @Override
+                                        protected void onPostExecute(Void result) {
+                                            // TODO Auto-generated method stub
+                                            super.onPostExecute(result);
+                                            int arrowColor = Color.BLUE;
+                                            BitmapDescriptor endCapIcon = getEndCapIcon(context, arrowColor);
+                                            polyline.addAll(listStep);
+                                            polyline.jointType(JointType.ROUND);
+                                            polyline.geodesic(true);
+                                            polyline.startCap(new CustomCap(endCapIcon, 8));
+                                            if (line != null)
+                                                line.remove();
+                                            line = map.addPolyline(polyline);
+                                            line.setColor(Color.BLUE);
+                                            line.setWidth(10);
+                                        }
+                                    };
+                                    task.execute(position);
+                                }
+                            });
+                            builder.setNegativeButton("Thoát", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialogInterface, int i) {
+                                    SoundEffects.getInstance(context).playSoundClick();
+                                    dialogInterface.dismiss();
+                                }
+                            });
+                            AlertDialog alertDialog = builder.create();
+                            alertDialog.show();
+                        }
+                    } else {
+                        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+                        builder.setTitle("Lỗi");
+                        builder.setMessage("Xin hãy chọn cây có màu vàng hoặc đỏ để tưới");
+                        builder.setIcon(R.drawable.ic_big_pine_tree_shape);
+                        builder.setCancelable(false);
+                        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                            SoundEffects.getInstance(context).playSoundClick();
+                            dialogInterface.dismiss();
+
+                            }
+                        });
+                        AlertDialog alertDialog = builder.create();
+                        alertDialog.show();
+                    }
+                } else {
+                    if (polyline != null && marker.getAlpha() == 1.0f) {
                         SoundEffects.getInstance(context).playSoundClick();
                         AlertDialog.Builder builder = new AlertDialog.Builder(context);
-                        LayoutInflater factory = LayoutInflater.from(context);
-                        final View view = factory.inflate(R.layout.dialog_layout, null);
-                        builder.setView(view);
-                        builder.setTitle("Tưới cây");
-                        builder.setIcon(R.drawable.ic_tree_with_three_circles_of_foliage);
+                        builder.setTitle("Xác nhận lấy nước");
+                        builder.setIcon(R.drawable.ic_add_water_black_24dp);
+                        builder.setMessage("Bạn đã lấy nước xong ? ");
                         builder.setCancelable(false);
-                        builder.setPositiveButton("Tưới nước", new DialogInterface.OnClickListener() {
+                        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                waveProgressView.setWaveColor("#5b9ef4");
+                                waveProgressView.setCurrent(80, "");
+                                Polyline poly = map.addPolyline(polyline);
+                                poly.remove();
+                            }
+                        });
+                        builder.setNegativeButton("Chưa lấy xong", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialogInterface, int i) {
                                 SoundEffects.getInstance(context).playSoundClick();
-                                Toast.makeText(context, "Bắt đàu di chuyển để tưới", Toast.LENGTH_SHORT).show();
+                                dialogInterface.dismiss();
+                            }
+                        });
+                        AlertDialog alertDialog = builder.create();
+                        alertDialog.show();
+                    } else {
+                        SoundEffects.getInstance(context).playSoundClick();
+                        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+                        builder.setTitle("Lấy nước");
+                        builder.setIcon(R.drawable.ic_add_water_black_24dp);
+                        builder.setMessage("Bạn có muốn lấy nước không? ");
+                        builder.setCancelable(false);
+                        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                SoundEffects.getInstance(context).playSoundClick();
+                                Toast.makeText(context, "Bắt đầu di chuyển để lấy nước", Toast.LENGTH_SHORT).show();
                                 for (int j = 0; j < listMarker.size(); j++) {
                                     listMarker.get(j).setAlpha(0.2F);
                                 }
@@ -349,104 +498,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, Locatio
                         });
                         AlertDialog alertDialog = builder.create();
                         alertDialog.show();
-                    } else {
-                        AlertDialog.Builder builder = new AlertDialog.Builder(context);
-                        LayoutInflater factory = LayoutInflater.from(context);
-                        final View view = factory.inflate(R.layout.dialog_layout, null);
-                        builder.setView(view);
-                        builder.setTitle("Xác nhận tưới cây");
-                        builder.setIcon(R.drawable.ic_tree_with_three_circles_of_foliage);
-                        builder.setCancelable(false);
-                        builder.setPositiveButton("Đã tưới", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialogInterface, int i) {
-//                            SoundEffects.getInstance(context).playSoundClick();
-                                synchronized (waveProgressView) {
-                                    waveProgressView.setCurrent(30, "");
-                                    waveProgressView.setWaveColor("#D80027");
-                                    waveProgressView.notify();
-                                }
-
-                            }
-                        });
-                        builder.setNegativeButton("Chưa tưới", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialogInterface, int i) {
-                                SoundEffects.getInstance(context).playSoundClick();
-                                dialogInterface.dismiss();
-                            }
-                        });
-                        AlertDialog alertDialog = builder.create();
-                        alertDialog.show();
                     }
-                } else {
-                    SoundEffects.getInstance(context).playSoundClick();
-                    AlertDialog.Builder builder = new AlertDialog.Builder(context);
-                    builder.setTitle("Lấy nước");
-                    builder.setIcon(R.drawable.ic_tree_with_three_circles_of_foliage);
-                    builder.setMessage("Bạn có muốn lấy nước không? ");
-                    builder.setCancelable(false);
-                    builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialogInterface, int i) {
-                            SoundEffects.getInstance(context).playSoundClick();
-                            Toast.makeText(context, "Bắt đàu di chuyển để lấy nước", Toast.LENGTH_SHORT).show();
-                            for (int j = 0; j < listMarker.size(); j++) {
-                                listMarker.get(j).setAlpha(0.2F);
-                            }
-                            marker.setAlpha(1.0f);
-                            listStep = new ArrayList<LatLng>();
-                            polyline = new PolylineOptions();
-                            Position position = new Position();
-                            position.setDesLat(Double.toString(marker.getPosition().latitude));
-                            position.setDesIng(Double.toString(marker.getPosition().longitude));
-                            task = new AsyncTask<Position, Void, Void>() {
-
-                                @Override
-                                protected Void doInBackground(Position... params) {
-
-                                    // Ha Yen : 21.0207512, 105.7938957
-                                    Location location = getMyLocation();
-                                    String request = makeURL(location.getLatitude() + "", location.getLongitude() + "",
-                                            params[0].getDesLat(), params[0].getDesIng());
-                                    Log.d("Test URL: ", request);
-                                    GetDirectionsTask task = new GetDirectionsTask(request);
-                                    ArrayList<LatLng> list = task.testDirection();
-                                    for (LatLng latLng : list) {
-                                        listStep.add(latLng);
-                                    }
-                                    return null;
-                                }
-
-                                @Override
-                                protected void onPostExecute(Void result) {
-                                    // TODO Auto-generated method stub
-                                    super.onPostExecute(result);
-                                    int arrowColor = Color.BLUE;
-                                    BitmapDescriptor endCapIcon = getEndCapIcon(context, arrowColor);
-                                    polyline.addAll(listStep);
-                                    polyline.jointType(JointType.ROUND);
-                                    polyline.geodesic(true);
-                                    polyline.startCap(new CustomCap(endCapIcon, 8));
-                                    if (line != null)
-                                        line.remove();
-                                    line = map.addPolyline(polyline);
-                                    line.setColor(Color.BLUE);
-                                    line.setWidth(10);
-                                }
-                            };
-                            task.execute(position);
-                        }
-                    });
-                    builder.setNegativeButton("Thoát", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialogInterface, int i) {
-                            SoundEffects.getInstance(context).playSoundClick();
-                            dialogInterface.dismiss();
-                        }
-                    });
-                    AlertDialog alertDialog = builder.create();
-                    alertDialog.show();
                 }
                 return false;
             }

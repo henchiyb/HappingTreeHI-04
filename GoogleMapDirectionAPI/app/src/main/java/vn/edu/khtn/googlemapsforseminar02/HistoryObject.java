@@ -1,7 +1,5 @@
 package vn.edu.khtn.googlemapsforseminar02;
 
-import java.util.Date;
-
 import io.realm.RealmObject;
 
 /**

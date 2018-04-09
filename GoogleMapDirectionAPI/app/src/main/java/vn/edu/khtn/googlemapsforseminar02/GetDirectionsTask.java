@@ -17,9 +17,11 @@ import java.util.List;
 
 public class GetDirectionsTask {
     private String mRequest;
+    private ArrayList<String> instructions;
 
     public GetDirectionsTask(String _mRequest) {
         this.mRequest = _mRequest;
+        this.instructions = new ArrayList<>();
     }
 
     public ArrayList<LatLng> testDirection() {
@@ -40,6 +42,7 @@ public class GetDirectionsTask {
                 for (int l = 0; l < list.size(); l++) {
                     ret.add((LatLng) list.get(l));
                 }
+                instructions.add(step.getHtml_instructions());
             }
             return ret;
 
@@ -88,5 +91,9 @@ public class GetDirectionsTask {
         }
 
         return poly;
+    }
+
+    public ArrayList<String> getInstructions() {
+        return instructions;
     }
 }
