@@ -3,11 +3,15 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context="vn.edu.khtn.googlemapsforseminar02.HistoryFragment"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:background="@color/primary">
     <TextView
         android:layout_width="match_parent"
         android:layout_height="50dp"
         android:text="HISTORY"
+        android:layout_gravity="center"
+        android:background="@color/primary_dark"
+        android:textSize="20sp"
         android:textColor="#ff000000"
         android:gravity="center"
         />
