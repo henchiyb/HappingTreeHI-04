@@ -412,9 +412,11 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, Locatio
             public void onClick(View v) {
                 if (isMultipleChoiceMarker){
                     Location location = getMyLocation();
-                    Log.d("TEST", makeURLWithMultipleMarker(location.getLatitude() + "", location.getLongitude() + "",
+                    final String URL = makeURLWithMultipleMarker(location.getLatitude() + "", location.getLongitude() + "",
                             String.valueOf(listMarkerSelected.get(listMarkerSelected.size()-1).getPosition().latitude),
-                            String.valueOf(listMarkerSelected.get(listMarkerSelected.size()-1).getPosition().longitude), listMarkerSelected));
+                            String.valueOf(listMarkerSelected.get(listMarkerSelected.size()-1).getPosition().longitude),
+                            listMarkerSelected);
+                    Log.d("TEST", URL);
                     listStep = new ArrayList<LatLng>();
                     polyline = new PolylineOptions();
                     Position position = new Position(String.valueOf(listMarkerSelected.get(listMarkerSelected.size()-1).getPosition().latitude),
@@ -424,8 +426,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, Locatio
                         protected Void doInBackground(Position... params) {
                             // Ha Yen : 21.0207512, 105.7938957
                             Location location = getMyLocation();
-                            String request = makeURLWithMultipleMarker(location.getLatitude() + "", location.getLongitude() + "",
-                                    "21.0207512", "105.7938957", listMarkerSelected);
+                            String request = URL;
                             Log.d("Test URL: ", request);
                             GetDirectionsTask task = new GetDirectionsTask(request);
                             ArrayList<LatLng> list = task.testDirection();
