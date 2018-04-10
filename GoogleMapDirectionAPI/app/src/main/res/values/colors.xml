@@ -1,8 +1,37 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#3F51B5</color>
-    <color name="colorPrimaryDark">#303F9F</color>
+    <!--<color name="colorPrimary">#3F51B5</color>-->
+    <color name="colorPrimary">#7CB342</color>
+    <color name="colorPrimaryDark">#558B2F</color>
+    <!--<color name="colorPrimaryDark">#303F9F</color>-->
     <color name="colorAccent">#FF4081</color>
     <color name="white_color_z">#ffdbdbdb</color>
     <color name="white_color">#FFFFFF</color>
+    <color name="green_dark">#558B2F</color>
+    <color name="green_light">#7CB342</color>
+
+    <color name="primary">#7CB342</color>
+    <color name="primary_dark">#558B2F</color>
+    <color name="primary_darker">#33691E</color>
+    <color name="accent">#FFFFFF</color>
+
+    <!--<color name="primary">#E43F3F</color>-->
+    <!--<color name="primary_dark">#E12929</color>-->
+    <!--<color name="primary_darker">#CC1D1D</color>-->
+    <!--<color name="accent">#FFFFFF</color>-->
+
+    <!--<color name="black">#000000</color>-->
+    <!--<color name="jet">#222222</color>-->
+    <color name="black">#33691E</color>
+    <color name="jet">#558B2F</color>
+    <color name="oil">#333333</color>
+    <color name="monsoon">#777777</color>
+    <color name="jumbo">#888888</color>
+    <color name="aluminum">#999999</color>
+    <color name="base">#AAAAAA</color>
+    <color name="iron">#CCCCCC</color>
+    <color name="white">#FFFFFF</color>
+    <color name="blue">#3F51B5</color>
+    <color name="red">#D80027</color>
+    <color name="yellow">#EEFF41</color>
 </resources>

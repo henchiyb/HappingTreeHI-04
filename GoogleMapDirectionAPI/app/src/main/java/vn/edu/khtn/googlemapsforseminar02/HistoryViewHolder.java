@@ -24,10 +24,11 @@ public class HistoryViewHolder extends RecyclerView.ViewHolder {
         tvNameTree = itemView.findViewById(R.id.tv_detail);
     }
 
-    public void setData(Position position){
+    public void setData(HistoryObject historyObject){
         imageView.setImageResource(R.drawable.ic_big_pine_tree_shape);
-        tvDetail.setText("DES LAT: " + position.getDesLat());
-        tvNameTree.setText("DES LONG: " + position.getDesIng());
-        itemView.setTag(position);
+        tvDetail.setText("Tên cây: " + historyObject.getTree().getName());
+        tvNameTree.setText("Thời gian tưới: " + historyObject.getDateTimeWater());
+        imageView.setImageResource(historyObject.getTree().getImageID());
+        itemView.setTag(historyObject);
     }
 }
