@@ -22,6 +22,11 @@ public class Utils {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        if (Utils.getBooleanFromPreference(context, "Music")) {
+            mediaPlayer.setVolume(1.0f, 1.0f);
+        } else {
+            mediaPlayer.setVolume(0, 0);
+        }
     }
 
     public static void saveBooleanToPreference(Context context, String namePref, boolean value) {

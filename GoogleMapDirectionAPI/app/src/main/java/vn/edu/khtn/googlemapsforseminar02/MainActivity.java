@@ -6,6 +6,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
 import android.location.Location;
+import android.media.MediaPlayer;
 import android.os.AsyncTask;
 import android.os.Bundle;
 
@@ -38,6 +39,7 @@ public class MainActivity extends AppCompatActivity
     private Fragment curentFragment;
     private MapFragment mapFragment;
     private boolean doubleBackToExitPressedOnce;
+    public MediaPlayer mediaPlayer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,6 +63,26 @@ public class MainActivity extends AppCompatActivity
             Utils.saveBooleanToPreference(this, "NewUser", true);
         }
         openFragment(mapFragment, false);
+        getSupportActionBar().setTitle("Map");
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        mediaPlayer = new MediaPlayer();
+        Utils.setDataSourceForMediaPlayer(this, mediaPlayer, "nhacthiennhien.mp3");
+        if (Utils.getBooleanFromPreference(this, Constant.MUSIC_PREF)){
+            mediaPlayer.setVolume(1.0f, 1.0f);
+        } else {
+            mediaPlayer.setVolume(0, 0);
+        }
+        mediaPlayer.start();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        mediaPlayer.release();
     }
 
     private void showDialogUserGuide(){
@@ -125,17 +147,20 @@ public class MainActivity extends AppCompatActivity
          if (id == R.id.nav_map) {
              if (!(curentFragment instanceof MapFragment)) {
                  openFragment(mapFragment, false);
+                 getSupportActionBar().setTitle("Map");
              }
         } else if (id == R.id.nav_history) {
              if (!(curentFragment instanceof HistoryFragment)) {
                  Fragment fragmentHistory = new HistoryFragment();
                  openFragment(fragmentHistory, false);
+                 getSupportActionBar().setTitle("History");
              }
 
         } else if (id == R.id.nav_setting) {
              if (!(curentFragment instanceof SettingFragment)) {
                  Fragment fragmentSetting = new SettingFragment();
                  openFragment(fragmentSetting, false);
+                 getSupportActionBar().setTitle("Setting");
              }
 
          }else if (id == R.id.nav_instructions) {

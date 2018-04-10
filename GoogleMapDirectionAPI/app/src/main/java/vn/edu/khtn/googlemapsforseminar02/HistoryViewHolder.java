@@ -1,5 +1,6 @@
 package vn.edu.khtn.googlemapsforseminar02;
 
+import android.graphics.Color;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.widget.TextView;
@@ -19,13 +20,15 @@ public class HistoryViewHolder extends RecyclerView.ViewHolder {
     private TextView tvDetail;
     public HistoryViewHolder(View itemView) {
         super(itemView);
-        imageView = itemView.findViewById(R.id.image_tree);
+        imageView = (CircleImageView) itemView.findViewById(R.id.image_tree);
         tvDetail = itemView.findViewById(R.id.tv_name_tree);
         tvNameTree = itemView.findViewById(R.id.tv_detail);
     }
 
     public void setData(HistoryObject historyObject){
         imageView.setImageResource(R.drawable.ic_big_pine_tree_shape);
+        imageView.setBorderColor(Color.BLACK);
+        imageView.setBackgroundColor(Color.WHITE);
         tvDetail.setText("Tên cây: " + historyObject.getTree().getName());
         tvNameTree.setText("Thời gian tưới: " + historyObject.getDateTimeWater());
         imageView.setImageResource(historyObject.getTree().getImageID());

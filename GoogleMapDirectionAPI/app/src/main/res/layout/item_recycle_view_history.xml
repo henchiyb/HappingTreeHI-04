@@ -4,6 +4,7 @@
     android:layout_height="80dp"
     android:gravity="center_vertical"
     android:layout_margin="8dp"
+    android:backgroundTint="@color/primary"
     >
     <RelativeLayout
         android:layout_width="match_parent"
@@ -14,15 +15,14 @@
             android:layout_margin="14dp"
             android:id="@+id/image_tree"
             android:src="@drawable/ic_big_pine_tree_shape"
-            android:background="@color/primary"
             />
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Name"
             android:textSize="15sp"
-            android:textColor="#ff000000"
-            android:id="@+id/tv_detail"
+            android:textColor="#ffffff"
+            android:id="@+id/tv_name_tree"
             android:layout_marginTop="14dp"
             android:layout_toEndOf="@+id/image_tree"/>
         <TextView
@@ -30,11 +30,11 @@
             android:layout_height="wrap_content"
             android:textSize="10sp"
             android:text="Detail"
-            android:textColor="#ff000000"
+            android:textColor="#ffffff"
             android:layout_marginBottom="14dp"
-            android:id="@+id/tv_name_tree"
+            android:id="@+id/tv_detail"
             android:layout_toEndOf="@+id/image_tree"
-            android:layout_below="@+id/tv_detail"
+            android:layout_below="@+id/tv_name_tree"
             android:gravity="center"/>
     </RelativeLayout>
 </android.support.v7.widget.CardView>

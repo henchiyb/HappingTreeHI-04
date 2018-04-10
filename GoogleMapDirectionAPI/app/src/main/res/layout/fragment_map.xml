@@ -11,9 +11,11 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
     <cn.fanrunqi.waveprogress.WaveProgressView
+        android:layout_marginTop="100dp"
         android:id="@+id/waveProgressbar"
         android:layout_margin="20dp"
         android:background="@drawable/watering_can"
         android:layout_width="50dp"
         android:layout_height="50dp" />
+
 </RelativeLayout>
