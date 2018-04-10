@@ -26,7 +26,7 @@ public class HistoryFragment extends Fragment implements View.OnClickListener {
         recyclerView.setLayoutManager(layoutManager);
         historyObjects = new ArrayList<>();
         historyObjects.add(new HistoryObject(new TreeObject(1, "Cây bàng", 10, 10, R.drawable.big_plant_like_a_small_tree), "25/03/2018 14:50"));
-        historyObjects.add(new HistoryObject(new TreeObject(2, "Cây bàng", 10, 10, R.drawable.autumn_tree_silhouette), "25/03/2018 14:50"));
+        historyObjects.add(new HistoryObject(new TreeObject(2, "Cây bàng", 10, 10, R.drawable.autumn_tree_silhouette_green), "25/03/2018 14:50"));
         historyObjects.add(new HistoryObject(new TreeObject(3, "Cây bàng", 10, 10, R.drawable.tree_curved_to_left_with_few_leaves_and_branches), "25/03/2018 14:50"));
         historyObjects.add(new HistoryObject(new TreeObject(4, "Cây bàng", 10, 10, R.drawable.tree_of_oval_horizontal_foliage), "25/03/2018 14:50"));
         historyObjects.add(new HistoryObject(new TreeObject(5, "Cây bàng", 10, 10, R.drawable.ic_tree_with_three_circles_of_foliage), "25/03/2018 14:50"));

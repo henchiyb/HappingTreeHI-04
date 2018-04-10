@@ -4,6 +4,9 @@ package vn.edu.khtn.googlemapsforseminar02;
 import android.content.DialogInterface;
 
 import android.content.Intent;
+import android.graphics.Color;
+import android.location.Location;
+import android.os.AsyncTask;
 import android.os.Bundle;
 
 import android.os.Handler;
@@ -16,8 +19,19 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.Toast;
+
+import com.google.android.gms.maps.model.BitmapDescriptor;
+import com.google.android.gms.maps.model.CustomCap;
+import com.google.android.gms.maps.model.JointType;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.PolylineOptions;
+
+import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -41,9 +55,32 @@ public class MainActivity extends AppCompatActivity
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
         mapFragment = new MapFragment();
+        if (!Utils.getBooleanFromPreference(this, "NewUser")){
+            //show dialog user guide
+            showDialogUserGuide();
+            Utils.saveBooleanToPreference(this, "NewUser", true);
+        }
         openFragment(mapFragment, false);
     }
 
+    private void showDialogUserGuide(){
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        LayoutInflater factory = LayoutInflater.from(this);
+        final View view = factory.inflate(R.layout.dialog_layout, null);
+        builder.setView(view);
+        builder.setTitle("Hướng dẫn");
+        builder.setIcon(R.drawable.ic_info_black_24dp);
+        builder.setCancelable(false);
+        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                dialogInterface.dismiss();
+            }
+        });
+
+        AlertDialog alertDialog = builder.create();
+        alertDialog.show();
+    }
     private void openFragment(Fragment fragment, boolean addToBackStack){
         curentFragment = fragment;
         FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
@@ -101,6 +138,8 @@ public class MainActivity extends AppCompatActivity
                  openFragment(fragmentSetting, false);
              }
 
+         }else if (id == R.id.nav_instructions) {
+            showDialogUserGuide();
          } else if (id == R.id.nav_log_out) {
              AlertDialog.Builder builder = new AlertDialog.Builder(this);
              builder.setTitle("Log out");
