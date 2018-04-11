@@ -66,7 +66,14 @@ public class SettingFragment extends Fragment implements View.OnClickListener{
             mediaPlayer.setVolume(0, 0);
             tgMusic.setChecked(false);
         }
+        tgVoice.setChecked(Utils.getBooleanFromPreference(context, Constant.VOICE_PREF));
         mediaPlayer.start();
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        mediaPlayer.release();
     }
 
     @Override

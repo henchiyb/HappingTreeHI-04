@@ -4,8 +4,10 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.AssetFileDescriptor;
 import android.media.MediaPlayer;
+import android.speech.tts.TextToSpeech;
 
 import java.io.IOException;
+import java.util.Locale;
 
 import static android.content.Context.MODE_PRIVATE;
 
@@ -14,6 +16,19 @@ import static android.content.Context.MODE_PRIVATE;
  */
 
 public class Utils {
+    private static TextToSpeech t1;
+    private static String googleTtsPackage = "com.google.android.tts";
+    public static TextToSpeech textToSpeech(Context context) {
+        t1 = new TextToSpeech(context, new TextToSpeech.OnInitListener() {
+            @Override
+            public void onInit(int status) {
+                if (status != TextToSpeech.ERROR) {
+                    t1.setSpeechRate(1.2f);
+                }
+            }
+        }, googleTtsPackage);
+        return t1;
+    }
     public static void setDataSourceForMediaPlayer(Context context, MediaPlayer mediaPlayer, String fileName){
         try {
             AssetFileDescriptor descriptor = context.getAssets().openFd("sounds/" + fileName);
@@ -33,7 +48,7 @@ public class Utils {
         SharedPreferences preferences = context.getSharedPreferences(namePref, MODE_PRIVATE);
         SharedPreferences.Editor editor = preferences.edit();
         editor.putBoolean(namePref, value);
-        editor.apply();
+        editor.commit();
     }
 
     public static boolean getBooleanFromPreference(Context context, String namePref) {

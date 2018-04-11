@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    >
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <ImageView
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:background="@drawable/watering_can"
+            android:backgroundTint="@color/blue"
+            android:padding="16dp"
+            android:layout_margin="8dp"/>
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:text="Chọn bình nước để tìm đường đến chỗ lấy nước"
+            android:textColor="#000000"
+            android:gravity="center"
+            android:padding="4dp"
+            android:textSize="14sp"
+            />
+    </LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <ImageView
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:background="@drawable/tree_black_silhouette_shape"
+            android:padding="16dp"
+            android:layout_margin="8dp"/>
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:text="Cây màu đỏ là những cây chưa đủ nước. Chạm vào cây màu đỏ trên bản đồ để tưới"
+            android:textColor="#000000"
+            android:gravity="center"
+            android:padding="4dp"
+            android:textSize="14sp"
+            />
+    </LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <ImageView
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:background="@drawable/tree_black_silhouette_shape_green"
+            android:padding="16dp"
+            android:layout_margin="8dp"/>
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:text="Cây màu xanh là những cây đã đủ nước, không thể tưới."
+            android:textColor="#000000"
+            android:gravity="center"
+            android:padding="4dp"
+            android:textSize="14sp"
+            />
+    </LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <ImageView
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:id="@+id/image_view"
+            android:background="@drawable/ic_touch_app_black_24dp"
+            android:padding="16dp"
+            android:layout_margin="8dp"/>
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:text="Chạm lâu vào bản đồ để mở chế độ chọn nhiều cây."
+            android:textColor="#000000"
+            android:gravity="center"
+            android:padding="4dp"
+            android:textSize="14sp"
+            />
+    </LinearLayout>
+
+</LinearLayout>

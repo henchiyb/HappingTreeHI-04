@@ -1,5 +1,6 @@
 package vn.edu.khtn.googlemapsforseminar02;
 
+import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
@@ -15,6 +16,7 @@ public class HistoryFragment extends Fragment implements View.OnClickListener {
 
     private HistoryViewAdapter adapter;
     private ArrayList<HistoryObject> historyObjects;
+    private MediaPlayer mediaPlayer;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -25,7 +27,7 @@ public class HistoryFragment extends Fragment implements View.OnClickListener {
         LinearLayoutManager layoutManager = new LinearLayoutManager(view.getContext());
         recyclerView.setLayoutManager(layoutManager);
         historyObjects = new ArrayList<>();
-        historyObjects.add(new HistoryObject(new TreeObject(1, "Cây bàng", 10, 10, R.drawable.avt), "25/03/2018 14:50"));
+        historyObjects.add(new HistoryObject(new TreeObject(1, "Cây bàng", 10, 10, R.drawable.autumn_tree_silhouette), "25/03/2018 14:50"));
         historyObjects.add(new HistoryObject(new TreeObject(2, "Cây bàng", 10, 10, R.drawable.autumn_tree_silhouette), "25/03/2018 14:50"));
         historyObjects.add(new HistoryObject(new TreeObject(3, "Cây bàng", 10, 10, R.drawable.tree_curved_to_left_with_few_leaves_and_branches), "25/03/2018 14:50"));
         historyObjects.add(new HistoryObject(new TreeObject(4, "Cây bàng", 10, 10, R.drawable.tree_of_oval_horizontal_foliage), "25/03/2018 14:50"));
@@ -41,5 +43,24 @@ public class HistoryFragment extends Fragment implements View.OnClickListener {
     @Override
     public void onClick(View v) {
 
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        mediaPlayer = new MediaPlayer();
+        Utils.setDataSourceForMediaPlayer(getActivity(), mediaPlayer, "nhacthiennhien.mp3");
+        if (Utils.getBooleanFromPreference(getActivity(), Constant.MUSIC_PREF)){
+            mediaPlayer.setVolume(1.0f, 1.0f);
+        } else {
+            mediaPlayer.setVolume(0, 0);
+        }
+        mediaPlayer.start();
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        mediaPlayer.release();
     }
 }

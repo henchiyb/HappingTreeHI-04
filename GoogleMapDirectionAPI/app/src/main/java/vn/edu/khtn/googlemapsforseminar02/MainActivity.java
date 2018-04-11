@@ -39,7 +39,6 @@ public class MainActivity extends AppCompatActivity
     private Fragment curentFragment;
     private MapFragment mapFragment;
     private boolean doubleBackToExitPressedOnce;
-    public MediaPlayer mediaPlayer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,6 +56,7 @@ public class MainActivity extends AppCompatActivity
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
         mapFragment = new MapFragment();
+        Utils.saveBooleanToPreference(this, Constant.VOICE_PREF, true);
         if (!Utils.getBooleanFromPreference(this, "NewUser")){
             //show dialog user guide
             showDialogUserGuide();
@@ -69,26 +69,17 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onResume() {
         super.onResume();
-        mediaPlayer = new MediaPlayer();
-        Utils.setDataSourceForMediaPlayer(this, mediaPlayer, "nhacthiennhien.mp3");
-        if (Utils.getBooleanFromPreference(this, Constant.MUSIC_PREF)){
-            mediaPlayer.setVolume(1.0f, 1.0f);
-        } else {
-            mediaPlayer.setVolume(0, 0);
-        }
-        mediaPlayer.start();
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        mediaPlayer.release();
     }
 
     private void showDialogUserGuide(){
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         LayoutInflater factory = LayoutInflater.from(this);
-        final View view = factory.inflate(R.layout.dialog_layout, null);
+        final View view = factory.inflate(R.layout.dialog_layout_instruction, null);
         builder.setView(view);
         builder.setTitle("Hướng dẫn");
         builder.setIcon(R.drawable.ic_info_black_24dp);
@@ -125,6 +116,11 @@ public class MainActivity extends AppCompatActivity
         }
         if (doubleBackToExitPressedOnce) {
             super.onBackPressed();
+        }
+
+        if (curentFragment instanceof MapFragment){
+            ((MapFragment) curentFragment).onBackPress();
+            getSupportActionBar().setTitle("Map");
         }
 
         this.doubleBackToExitPressedOnce = true;
