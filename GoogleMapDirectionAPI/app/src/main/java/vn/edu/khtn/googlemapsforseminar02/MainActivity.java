@@ -140,7 +140,19 @@ public class MainActivity extends AppCompatActivity
     public boolean onNavigationItemSelected(MenuItem item) {
         // Handle navigation view item clicks here.
         int id = item.getItemId();
-         if (id == R.id.nav_map) {
+        if (id == R.id.nav_find_tree) {
+            if (!(curentFragment instanceof MapFragment)) {
+                openFragment(mapFragment, false);
+                getSupportActionBar().setTitle("Map");
+            }
+            mapFragment.findNearestTree();
+        } else if (id == R.id.nav_find_water) {
+            if (!(curentFragment instanceof MapFragment)) {
+                openFragment(mapFragment, false);
+                getSupportActionBar().setTitle("Map");
+            }
+            mapFragment.findWater();
+        } else if (id == R.id.nav_map) {
              if (!(curentFragment instanceof MapFragment)) {
                  openFragment(mapFragment, false);
                  getSupportActionBar().setTitle("Map");

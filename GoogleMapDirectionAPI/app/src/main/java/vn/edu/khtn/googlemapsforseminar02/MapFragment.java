@@ -2,6 +2,7 @@ package vn.edu.khtn.googlemapsforseminar02;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.pm.PackageManager;
@@ -63,7 +64,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, Locatio
     private PolylineOptions polyline;
     private Polyline line;
     private GoogleMap map;
-    private AsyncTask<Position, Void, Void> task;
+    private AsyncTask<Position, String, String> task;
     private WaveProgressView waveProgressView;
     private FragmentActivity context;
     private ArrayList<Marker> listMarker;
@@ -78,6 +79,9 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, Locatio
     private TextView tvInstructionsWay;
     private TextToSpeech textToSpeech;
     private MediaPlayer mediaPlayer;
+    private String instruction;
+    private Marker findWaterMarker;
+    private Marker findTreeMarker;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -168,6 +172,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, Locatio
             urlString.append(markers.get(markers.size()-1).getPosition().latitude);
             urlString.append(",");
             urlString.append(markers.get(markers.size()-1).getPosition().longitude);
+        } else if(markers.size() == 1){
+            return makeURL(sourcelat, sourcelng, destlat, destlng);
         } else {
             urlString.append("&waypoints=");// to
             urlString.append(markers.get(0).getPosition().latitude);
@@ -218,7 +224,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, Locatio
     private Location getMyLocation() {
         LocationManager locationManager = (LocationManager) context.getSystemService(LOCATION_SERVICE);
         String locationProvider = this.getEnabledLocationProvider();
-        Log.d(MYTAG, "test");
         if (locationProvider == null) {
             return null;
         }
@@ -258,7 +263,154 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, Locatio
         listMarker.add(marker);
         return marker;
     }
-    private Marker makerWater;
+
+    public void findNearestTree(){
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+        LayoutInflater factory = LayoutInflater.from(context);
+        final View view = factory.inflate(R.layout.dialog_layout, null);
+        builder.setView(view);
+        builder.setTitle("Tưới cây");
+        builder.setIcon(R.drawable.ic_tree_with_three_circles_of_foliage);
+        builder.setCancelable(false);
+        builder.setPositiveButton("Tưới nước", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                SoundEffects.getInstance(context).playSoundClick();
+                Toast.makeText(context, "Bắt đầu di chuyển để tưới", Toast.LENGTH_SHORT).show();
+                for (int j = 0; j < listMarker.size(); j++) {
+                    listMarker.get(j).setAlpha(0.5F);
+                }
+                findTreeMarker.setAlpha(1.0f);
+                listStep = new ArrayList<LatLng>();
+                polyline = new PolylineOptions();
+                Position position = new Position();
+                position.setDesLat(Double.toString(findTreeMarker.getPosition().latitude));
+                position.setDesIng(Double.toString(findTreeMarker.getPosition().longitude));
+                task = new AsyncTask<Position, String, String>() {
+
+                    @Override
+                    protected String doInBackground(Position... params) {
+
+                        // Ha Yen : 21.0207512, 105.7938957
+                        Location location = getMyLocation();
+                        String request = makeURL(location.getLatitude() + "", location.getLongitude() + "",
+                                params[0].getDesLat(), params[0].getDesIng());
+                        Log.d("Test URL: ", request);
+                        GetDirectionsTask task = new GetDirectionsTask(request);
+                        ArrayList<LatLng> list = task.testDirection();
+
+                        for (LatLng latLng : list) {
+                            listStep.add(latLng);
+                        }
+                        instruction = task.getInstructions().get(1);
+                        return instruction;
+                    }
+
+                    @Override
+                    protected void onPostExecute(String result) {
+                        // TODO Auto-generated method stub
+                        super.onPostExecute(result);
+                        int arrowColor = Color.BLUE;
+                        BitmapDescriptor endCapIcon = getEndCapIcon(context, arrowColor);
+                        polyline.addAll(listStep);
+                        polyline.jointType(JointType.ROUND);
+                        polyline.geodesic(true);
+                        polyline.startCap(new CustomCap(endCapIcon, 8));
+                        if (line != null)
+                            line.remove();
+                        line = map.addPolyline(polyline);
+                        line.setColor(Color.BLUE);
+                        line.setWidth(10);
+                    }
+                };
+                task.execute(position);
+                tvInstructionsWay.setVisibility(View.VISIBLE);
+                //TODO:
+                textToSpeech.speak(tvInstructionsWay.getText().toString(), TextToSpeech.QUEUE_FLUSH, null);
+            }
+        });
+        builder.setNegativeButton("Thoát", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                SoundEffects.getInstance(context).playSoundClick();
+                dialogInterface.dismiss();
+            }
+        });
+        AlertDialog alertDialog = builder.create();
+        alertDialog.show();
+    }
+
+    public void findWater() {
+        SoundEffects.getInstance(context).playSoundClick();
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+        builder.setTitle("Lấy nước");
+        builder.setIcon(R.drawable.ic_add_water_black_24dp);
+        builder.setMessage("Bạn có muốn đi lấy thêm nước không ?");
+        builder.setCancelable(false);
+        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                SoundEffects.getInstance(context).playSoundClick();
+                Toast.makeText(context, "Bắt đầu di chuyển để lấy nước", Toast.LENGTH_SHORT).show();
+                listStep = new ArrayList<LatLng>();
+                polyline = new PolylineOptions();
+                Position position = new Position();
+                position.setDesLat(Double.toString(findWaterMarker.getPosition().latitude));
+                position.setDesIng(Double.toString(findWaterMarker.getPosition().longitude));
+                task = new AsyncTask<Position, String, String>() {
+
+                    @Override
+                    protected String doInBackground(Position... params) {
+
+                        // Ha Yen : 21.0207512, 105.7938957
+                        Location location = getMyLocation();
+//                                Location location = map.getMyLocation();
+                        String request = makeURL(location.getLatitude() + "", location.getLongitude() + "",
+                                params[0].getDesLat(), params[0].getDesIng());
+                        Log.d("Test URL: ", request);
+                        GetDirectionsTask task = new GetDirectionsTask(request);
+                        ArrayList<LatLng> list = task.testDirection();
+
+                        for (LatLng latLng : list) {
+                            listStep.add(latLng);
+                        }
+                        instruction = task.getInstructions().get(1);
+                        return instruction;
+                    }
+
+                    @Override
+                    protected void onPostExecute(String result) {
+                        // TODO Auto-generated method stub
+                        super.onPostExecute(result);
+                        int arrowColor = Color.BLUE;
+                        BitmapDescriptor endCapIcon = getEndCapIcon(context, arrowColor);
+                        polyline.addAll(listStep);
+                        polyline.jointType(JointType.ROUND);
+                        polyline.geodesic(true);
+                        polyline.startCap(new CustomCap(endCapIcon, 8));
+                        if (line != null)
+                            line.remove();
+                        line = map.addPolyline(polyline);
+                        line.setColor(Color.BLUE);
+                        line.setWidth(10);
+                    }
+                };
+                task.execute(position);
+                tvInstructionsWay.setVisibility(View.VISIBLE);
+                tvInstructionsWay.setText("Tiến về phía trước 50m, rẽ trái");
+                textToSpeech.speak(tvInstructionsWay.getText().toString(), TextToSpeech.QUEUE_FLUSH, null);
+            }
+        });
+        builder.setNegativeButton("Thoát", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                SoundEffects.getInstance(context).playSoundClick();
+                dialogInterface.dismiss();
+            }
+        });
+        AlertDialog alertDialog = builder.create();
+        alertDialog.show();
+    }
     @Override
     public void onMapReady(GoogleMap googleMap) {
         this.map = googleMap;
@@ -272,10 +424,10 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, Locatio
             makerWater.setTitle("Chỗ lấy nước");
             new Handler().postDelayed(new AnimateMarker(makerWater, 1, 0.5F, 0.1F), 50);
 
-            Marker makerWater1 = createTreeMarker(new LatLng(21.005666, 105.841769), R.drawable.ic_tap, 1.0f);
-            listMarkerWater.add(makerWater1);
+            findWaterMarker = createTreeMarker(new LatLng(21.005666, 105.841769), R.drawable.ic_tap, 1.0f);
+            listMarkerWater.add(findWaterMarker);
             makerWater.setTitle("Chỗ lấy nước");
-            new Handler().postDelayed(new AnimateMarker(makerWater1, 1, 0.5F, 0.1F), 50);
+            new Handler().postDelayed(new AnimateMarker(findWaterMarker, 1, 0.5F, 0.1F), 50);
 
             Marker makerWater2 = createTreeMarker(new LatLng(21.006926, 105.844432), R.drawable.ic_tap, 1.0f);
             listMarkerWater.add(makerWater2);
@@ -292,12 +444,12 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, Locatio
             makerWater.setTitle("Chỗ lấy nước");
             new Handler().postDelayed(new AnimateMarker(makerWater4, 1, 0.5F, 0.1F), 50);
 
-            Marker maker = createTreeMarker(new LatLng(21.006543, 105.841761), R.drawable.ic_tree_with_three_circles_of_foliage, 1.0f);
-            maker.setTitle("Cây bàng");
-            maker.setSnippet("Tôi thiếu nước. Hãy tưới cho tôi");
-            listMarkerCanWater.add(maker);
-            new Handler().postDelayed(new AnimateMarker(maker, 0.1F, 0.1F), 50);
-            maker.showInfoWindow();
+            findTreeMarker = createTreeMarker(new LatLng(21.006543, 105.841761), R.drawable.ic_tree_with_three_circles_of_foliage, 1.0f);
+            findTreeMarker.setTitle("Cây bàng");
+            findTreeMarker.setSnippet("Tôi thiếu nước. Hãy tưới cho tôi");
+            listMarkerCanWater.add(findTreeMarker);
+            new Handler().postDelayed(new AnimateMarker(findTreeMarker, 0.1F, 0.1F), 50);
+            findTreeMarker.showInfoWindow();
 
             Marker maker2 = createTreeMarker(new LatLng(21.004140, 105.844579), R.drawable.ic_big_pine_tree_shape_green, 1.0f);
             maker2.setTitle("Cây thông");
@@ -443,64 +595,128 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, Locatio
             marker20.setSnippet("Tôi đã đủ nước rồi");
             listMarkerCannotWater.add(marker20);
         }
+//        waveProgressView.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                SoundEffects.getInstance(context).playSoundClick();
+//                AlertDialog.Builder builder = new AlertDialog.Builder(context);
+//                builder.setTitle("Lấy nước");
+//                builder.setIcon(R.drawable.ic_add_water_black_24dp);
+//                builder.setMessage("Bạn có muốn đi lấy thêm nước không ?");
+//                builder.setCancelable(false);
+//                builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+//                    @Override
+//                    public void onClick(DialogInterface dialogInterface, int i) {
+//                        SoundEffects.getInstance(context).playSoundClick();
+//                        Toast.makeText(context, "Bắt đầu di chuyển để lấy nước", Toast.LENGTH_SHORT).show();
+//                        listStep = new ArrayList<LatLng>();
+//                        polyline = new PolylineOptions();
+//                        Position position = new Position();
+//                        position.setDesLat(Double.toString(listMarker.get(1).getPosition().latitude));
+//                        position.setDesIng(Double.toString(listMarker.get(1).getPosition().longitude));
+//                        task = new AsyncTask<Position, String, String>() {
+//
+//                            @Override
+//                            protected String doInBackground(Position... params) {
+//
+//                                // Ha Yen : 21.0207512, 105.7938957
+//                                Location location = getMyLocation();
+////                                Location location = map.getMyLocation();
+//                                String request = makeURL(location.getLatitude() + "", location.getLongitude() + "",
+//                                        params[0].getDesLat(), params[0].getDesIng());
+//                                Log.d("Test URL: ", request);
+//                                GetDirectionsTask task = new GetDirectionsTask(request);
+//                                ArrayList<LatLng> list = task.testDirection();
+//
+//                                for (LatLng latLng : list) {
+//                                    listStep.add(latLng);
+//                                }
+//                                instruction = task.getInstructions().get(1);
+//                                return instruction;
+//                            }
+//
+//                            @Override
+//                            protected void onPostExecute(String result) {
+//                                // TODO Auto-generated method stub
+//                                super.onPostExecute(result);
+//                                int arrowColor = Color.BLUE;
+//                                BitmapDescriptor endCapIcon = getEndCapIcon(context, arrowColor);
+//                                polyline.addAll(listStep);
+//                                polyline.jointType(JointType.ROUND);
+//                                polyline.geodesic(true);
+//                                polyline.startCap(new CustomCap(endCapIcon, 8));
+//                                if (line != null)
+//                                    line.remove();
+//                                line = map.addPolyline(polyline);
+//                                line.setColor(Color.BLUE);
+//                                line.setWidth(10);
+////                                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
+////                                    tvInstructionsWay.setText(Html.fromHtml(result,Html.FROM_HTML_MODE_LEGACY));
+////                                } else {
+////                                    tvInstructionsWay.setText(Html.fromHtml(result));
+////                                }
+//                            }
+//                        };
+//                        task.execute(position);
+//                        tvInstructionsWay.setVisibility(View.VISIBLE);
+//                        tvInstructionsWay.setText("Tiến về phía trước 50m, rẽ trái");
+//                        textToSpeech.speak(tvInstructionsWay.getText().toString(), TextToSpeech.QUEUE_FLUSH, null);
+//                    }
+//
+//                });
+//                builder.setNegativeButton("Thoát", new DialogInterface.OnClickListener() {
+//                    @Override
+//                    public void onClick(DialogInterface dialogInterface, int i) {
+//                        SoundEffects.getInstance(context).playSoundClick();
+//                        dialogInterface.dismiss();
+//                    }
+//                });
+//                AlertDialog alertDialog = builder.create();
+//                alertDialog.show();
+//            }
+//        });
+
         waveProgressView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 SoundEffects.getInstance(context).playSoundClick();
                 AlertDialog.Builder builder = new AlertDialog.Builder(context);
-                builder.setTitle("Lấy nước");
+                builder.setTitle("Tưới nước");
                 builder.setIcon(R.drawable.ic_add_water_black_24dp);
-                builder.setMessage("Bạn có muốn đi lấy thêm nước không ?");
+                builder.setMessage("Bắt đầu tưới nước ?");
                 builder.setCancelable(false);
                 builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        SoundEffects.getInstance(context).playSoundClick();
-                        Toast.makeText(context, "Bắt đàu di chuyển để lấy nước", Toast.LENGTH_SHORT).show();
-                        listStep = new ArrayList<LatLng>();
-                        polyline = new PolylineOptions();
-                        Position position = new Position();
-                        position.setDesLat(Double.toString(listMarker.get(1).getPosition().latitude));
-                        position.setDesIng(Double.toString(listMarker.get(1).getPosition().longitude));
-                        task = new AsyncTask<Position, Void, Void>() {
-
                             @Override
-                            protected Void doInBackground(Position... params) {
-
-                                // Ha Yen : 21.0207512, 105.7938957
-                                Location location = getMyLocation();
-                                String request = makeURL(location.getLatitude() + "", location.getLongitude() + "",
-                                        params[0].getDesLat(), params[0].getDesIng());
-                                Log.d("Test URL: ", request);
-                                GetDirectionsTask task = new GetDirectionsTask(request);
-                                ArrayList<LatLng> list = task.testDirection();
-                                for (LatLng latLng : list) {
-                                    listStep.add(latLng);
-                                }
-                                return null;
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                SoundEffects.getInstance(context).playSoundClick();
+                                Toast.makeText(context, "Di chuyển xung quanh gốc cây để tưới nước", Toast.LENGTH_SHORT).show();
+                                textToSpeech.speak("Di chuyển xung quanh gốc cây để tưới nước", TextToSpeech.QUEUE_FLUSH, null);
+                                final ProgressDialog progressDialog = new ProgressDialog(getActivity(),
+                                        R.style.AppTheme_Dark_Dialog);
+                                progressDialog.setIndeterminate(true);
+                                progressDialog.setMessage("Tưới cây ...");
+                                progressDialog.show();
+                                new Handler().postDelayed(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        progressDialog.dismiss();
+                                        textToSpeech.speak("Đã tưới đủ. Đợi xác nhận lượng nước đã tưới", TextToSpeech.QUEUE_FLUSH, null);
+                                        final ProgressDialog progressDialog = new ProgressDialog(getActivity(),
+                                                R.style.AppTheme_Dark_Dialog);
+                                        progressDialog.setIndeterminate(true);
+                                        progressDialog.setMessage("Xác nhận ...");
+                                        progressDialog.show();
+                                        new android.os.Handler().postDelayed(
+                                                new Runnable() {
+                                                    public void run() {
+                                                        progressDialog.dismiss();
+                                                        Toast.makeText(context, "Hoàn thành xác nhận", Toast.LENGTH_SHORT).show();
+                                                    }
+                                                }, 5000);
+                                    }
+                                }, 4000);
                             }
-
-                            @Override
-                            protected void onPostExecute(Void result) {
-                                // TODO Auto-generated method stub
-                                super.onPostExecute(result);
-                                int arrowColor = Color.BLUE;
-                                BitmapDescriptor endCapIcon = getEndCapIcon(context, arrowColor);
-                                polyline.addAll(listStep);
-                                polyline.jointType(JointType.ROUND);
-                                polyline.geodesic(true);
-                                polyline.startCap(new CustomCap(endCapIcon, 8));
-                                if (line != null)
-                                    line.remove();
-                                line = map.addPolyline(polyline);
-                                line.setColor(Color.BLUE);
-                                line.setWidth(10);
-                            }
-                        };
-                        task.execute(position);
-                    }
-
-                });
+                        });
                 builder.setNegativeButton("Thoát", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
@@ -512,6 +728,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, Locatio
                 alertDialog.show();
             }
         });
+
         map.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
             @SuppressLint("StaticFieldLeak")
             @Override
@@ -574,10 +791,10 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, Locatio
                                         Position position = new Position();
                                         position.setDesLat(Double.toString(marker.getPosition().latitude));
                                         position.setDesIng(Double.toString(marker.getPosition().longitude));
-                                        task = new AsyncTask<Position, Void, Void>() {
+                                        task = new AsyncTask<Position, String, String>() {
 
                                             @Override
-                                            protected Void doInBackground(Position... params) {
+                                            protected String doInBackground(Position... params) {
 
                                                 // Ha Yen : 21.0207512, 105.7938957
                                                 Location location = getMyLocation();
@@ -586,14 +803,16 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, Locatio
                                                 Log.d("Test URL: ", request);
                                                 GetDirectionsTask task = new GetDirectionsTask(request);
                                                 ArrayList<LatLng> list = task.testDirection();
+
                                                 for (LatLng latLng : list) {
                                                     listStep.add(latLng);
                                                 }
-                                                return null;
+                                                instruction = task.getInstructions().get(1);
+                                                return instruction;
                                             }
 
                                             @Override
-                                            protected void onPostExecute(Void result) {
+                                            protected void onPostExecute(String result) {
                                                 // TODO Auto-generated method stub
                                                 super.onPostExecute(result);
                                                 int arrowColor = Color.BLUE;
@@ -607,9 +826,16 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, Locatio
                                                 line = map.addPolyline(polyline);
                                                 line.setColor(Color.BLUE);
                                                 line.setWidth(10);
+//                                                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
+//                                                    tvInstructionsWay.setText(Html.fromHtml(result,Html.FROM_HTML_MODE_LEGACY));
+//                                                } else {
+//                                                    tvInstructionsWay.setText(Html.fromHtml(result));
+//                                                }
                                             }
                                         };
                                         task.execute(position);
+
+//                                        tvInstructionsWay.setText(Html.fromHtml(instruction, Html.FROM_HTML_MODE_COMPACT));
                                         tvInstructionsWay.setVisibility(View.VISIBLE);
                                         //TODO:
                                         textToSpeech.speak(tvInstructionsWay.getText().toString(), TextToSpeech.QUEUE_FLUSH, null);
@@ -689,10 +915,10 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, Locatio
                                     Position position = new Position();
                                     position.setDesLat(Double.toString(marker.getPosition().latitude));
                                     position.setDesIng(Double.toString(marker.getPosition().longitude));
-                                    task = new AsyncTask<Position, Void, Void>() {
+                                    task = new AsyncTask<Position, String, String>() {
 
                                         @Override
-                                        protected Void doInBackground(Position... params) {
+                                        protected String doInBackground(Position... params) {
 
                                             // Ha Yen : 21.0207512, 105.7938957
                                             Location location = getMyLocation();
@@ -704,11 +930,12 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, Locatio
                                             for (LatLng latLng : list) {
                                                 listStep.add(latLng);
                                             }
-                                            return null;
+                                            instruction = task.getInstructions().get(1);
+                                            return instruction;
                                         }
 
                                         @Override
-                                        protected void onPostExecute(Void result) {
+                                        protected void onPostExecute(String result) {
                                             // TODO Auto-generated method stub
                                             super.onPostExecute(result);
                                             int arrowColor = Color.BLUE;
@@ -800,52 +1027,68 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, Locatio
                 for (int i = 0; i < listMarkerSelected.size(); i ++){
                     listMarkerSelected.get(i).setAlpha(1.0F);
                 }
-                Location location = getMyLocation();
-                final String URL = makeURLWithMultipleMarker(location.getLatitude() + "", location.getLongitude() + "",
-                        String.valueOf(listMarkerSelected.get(listMarkerSelected.size()-1).getPosition().latitude),
-                        String.valueOf(listMarkerSelected.get(listMarkerSelected.size()-1).getPosition().longitude),
-                        listMarkerSelected);
-                Log.d("TEST", URL);
-                listStep = new ArrayList<LatLng>();
-                polyline = new PolylineOptions();
-                Position position = new Position(String.valueOf(listMarkerSelected.get(listMarkerSelected.size()-1).getPosition().latitude),
-                        String.valueOf(listMarkerSelected.get(listMarkerSelected.size()-1).getPosition().longitude));
-                task = new AsyncTask<Position, Void, Void>() {
-                    @Override
-                    protected Void doInBackground(Position... params) {
-                        // Ha Yen : 21.0207512, 105.7938957
-                        Location location = getMyLocation();
-                        String request = URL;
-                        Log.d("Test URL: ", request);
-                        GetDirectionsTask task = new GetDirectionsTask(request);
-                        ArrayList<LatLng> list = task.testDirection();
-                        for (LatLng latLng : list) {
-                            listStep.add(latLng);
-                        }
-                        return null;
-                    }
+                if (listMarkerSelected.size() != 0){
+                    Location location = getMyLocation();
+//                    Location location = LocationServices.FusedLocationApi.getLastLocation(googleApiClient);
 
-                    @Override
-                    protected void onPostExecute(Void result) {
-                        // TODO Auto-generated method stub
-                        super.onPostExecute(result);
-                        int arrowColor = Color.BLUE;
-                        BitmapDescriptor endCapIcon = getEndCapIcon(context, arrowColor);
-                        polyline.addAll(listStep);
-                        polyline.jointType(JointType.ROUND);
-                        polyline.geodesic(true);
-                        polyline.startCap(new CustomCap(endCapIcon, 8));
-                        if (line != null)
-                            line.remove();
-                        line = map.addPolyline(polyline);
-                        line.setColor(Color.BLUE);
-                        line.setWidth(10);
-                    }
-                };
-                task.execute(position);
-                listMarkerSelected = new ArrayList<>();
-                tvInstructionsWay.setVisibility(View.VISIBLE);
-                textToSpeech.speak(tvInstructionsWay.getText().toString(), TextToSpeech.QUEUE_FLUSH, null);
+                    final String URL = makeURLWithMultipleMarker(location.getLatitude() + "", location.getLongitude() + "",
+//                    final String URL = makeURLWithMultipleMarker( "16", "122",
+                            String.valueOf(listMarkerSelected.get(listMarkerSelected.size()-1).getPosition().latitude),
+                            String.valueOf(listMarkerSelected.get(listMarkerSelected.size()-1).getPosition().longitude),
+                            listMarkerSelected);
+                    Log.d("TEST", URL);
+                    listStep = new ArrayList<LatLng>();
+                    polyline = new PolylineOptions();
+                    Position position = new Position(String.valueOf(listMarkerSelected.get(listMarkerSelected.size()-1).getPosition().latitude),
+                            String.valueOf(listMarkerSelected.get(listMarkerSelected.size()-1).getPosition().longitude));
+                    task = new AsyncTask<Position, String, String>() {
+                        @Override
+                        protected String doInBackground(Position... params) {
+                            // Ha Yen : 21.0207512, 105.7938957
+                            Location location = getMyLocation();
+                            String request = URL;
+                            Log.d("Test URL: ", request);
+                            GetDirectionsTask task = new GetDirectionsTask(request);
+                            ArrayList<LatLng> list = task.testDirection();
+
+                            Log.d("TEST", task.getInstructions().toString());
+                            for (LatLng latLng : list) {
+                                listStep.add(latLng);
+                            }
+                            instruction = task.getInstructions().get(1);
+                            return instruction;
+                        }
+
+                        @Override
+                        protected void onPostExecute(String result) {
+                            // TODO Auto-generated method stub
+                            super.onPostExecute(result);
+                            int arrowColor = Color.BLUE;
+                            BitmapDescriptor endCapIcon = getEndCapIcon(context, arrowColor);
+                            polyline.addAll(listStep);
+                            polyline.jointType(JointType.ROUND);
+                            polyline.geodesic(true);
+                            polyline.startCap(new CustomCap(endCapIcon, 8));
+//                        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
+//                            tvInstructionsWay.setText(Html.fromHtml(result,Html.FROM_HTML_MODE_LEGACY));
+//                        } else {
+//                            tvInstructionsWay.setText(Html.fromHtml(result));
+//                        }
+                            if (line != null)
+                                line.remove();
+                            line = map.addPolyline(polyline);
+                            line.setColor(Color.BLUE);
+                            line.setWidth(10);
+                        }
+                    };
+                    task.execute(position);
+                    listMarkerSelected = new ArrayList<>();
+                    tvInstructionsWay.setVisibility(View.VISIBLE);
+                    tvInstructionsWay.setText("Rẽ phải cạnh thư viện Tạ Quang Bửu");
+                    textToSpeech.speak(tvInstructionsWay.getText().toString(), TextToSpeech.QUEUE_FLUSH, null);
+                    ((MainActivity)getActivity()).getSupportActionBar().setTitle("Map");
+                }
+
             }
         });
         btnCancelMultiple.setOnClickListener(new View.OnClickListener() {
@@ -858,6 +1101,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, Locatio
                     listMarker.get(i).setAlpha(1.0F);
                 }
                 listMarkerSelected = new ArrayList<>();
+                ((MainActivity)getActivity()).getSupportActionBar().setTitle("Map");
             }
         });
     }
@@ -876,6 +1120,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, Locatio
         }
         if (line != null)
             line.remove();
+        ((MainActivity)getActivity()).getSupportActionBar().setTitle("Map");
     }
     public BitmapDescriptor getEndCapIcon(Context context,  int color) {
         // mipmap icon - white arrow, pointing up, with point at center of image
@@ -931,6 +1176,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, Locatio
     private void showMyLocation() {
         Location myLocation = getMyLocation();
         if (myLocation != null) {
+            //TODO
             LatLng latLng = new LatLng(myLocation.getLatitude(), myLocation.getLongitude());
             map.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 17));
         } else {

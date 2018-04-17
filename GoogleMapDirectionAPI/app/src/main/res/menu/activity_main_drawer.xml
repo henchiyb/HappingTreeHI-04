@@ -5,28 +5,36 @@
 
     <group android:checkableBehavior="single">
         <item
+            android:id="@+id/nav_find_tree"
+            android:icon="@drawable/ic_big_pine_tree_shape_black"
+            android:title="Tìm cây để tưới" />
+        <item
+            android:id="@+id/nav_find_water"
+            android:icon="@drawable/ic_add_water_black_24dp"
+            android:title="Tìm chỗ lấy nước" />
+        <item
             android:id="@+id/nav_map"
             android:icon="@drawable/ic_map_black_24dp"
-            android:title="Map" />
+            android:title="Bản đồ" />
         <item
             android:id="@+id/nav_history"
             android:icon="@drawable/ic_history_black_24dp"
-            android:title="History" />
+            android:title="Lịch sử" />
         <item
             android:id="@+id/nav_setting"
             android:icon="@drawable/ic_settings_black_24dp"
-            android:title="Setting" />
+            android:title="Cài đặt" />
         <item
             android:id="@+id/nav_instructions"
             android:icon="@drawable/ic_info_black_24dp"
-            android:title="Instruction" />
+            android:title="Hướng dẫn" />
     </group>
     <item android:title="Action">
         <menu>
             <item
                 android:id="@+id/nav_log_out"
                 android:icon="@drawable/ic_clear_black_24dp"
-                android:title="Log out" />
+                android:title="Đăng xuất" />
         </menu>
     </item>
 

@@ -21,8 +21,6 @@ import android.widget.ToggleButton;
 
 public class SettingFragment extends Fragment implements View.OnClickListener{
     private ToggleButton tgVoice, tgMusic, tgTimer;
-    private TextView tvRound, tvTimeReminder, tvRepeat;
-    private RelativeLayout viewTimeReminder, viewRepeat;
     private MediaPlayer mediaPlayer;
     private Context context;
     @Nullable
@@ -32,11 +30,7 @@ public class SettingFragment extends Fragment implements View.OnClickListener{
         context = this.getActivity();
         tgVoice = (ToggleButton) view.findViewById(R.id.toggle_voice);
         tgMusic = (ToggleButton) view.findViewById(R.id.toggle_music);
-        tvTimeReminder = (TextView) view.findViewById(R.id.tv_reminder);
-        tvRepeat = (TextView) view.findViewById(R.id.tv_repeat);
         tgTimer = (ToggleButton) view.findViewById(R.id.toggle_timer);
-        viewTimeReminder = (RelativeLayout) view.findViewById(R.id.view_time_reminder);
-        viewRepeat = (RelativeLayout) view.findViewById(R.id.view_repeat);
         initData();
         addListeners();
         return view;
@@ -50,7 +44,6 @@ public class SettingFragment extends Fragment implements View.OnClickListener{
     private void addListeners() {
         tgVoice.setOnClickListener(this);
         tgMusic.setOnClickListener(this);
-        tvTimeReminder.setOnClickListener(this);
         tgTimer.setOnClickListener(this);
     }
 

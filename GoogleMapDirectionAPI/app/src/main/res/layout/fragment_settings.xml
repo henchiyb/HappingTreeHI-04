@@ -113,63 +113,6 @@
                 android:layout_alignParentRight="true"
                 android:id="@+id/toggle_timer"
                 />
-
         </RelativeLayout>
-        <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:paddingRight="@dimen/activity_horizontal_margin"
-            android:id="@+id/view_time_reminder">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Time reminder"
-                android:padding="@dimen/activity_horizontal_margin"
-                android:textSize="16sp"
-                android:layout_centerVertical="true"
-                android:textColor="#000000"/>
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:gravity="center"
-                android:layout_height="wrap_content"
-                android:text="12:00"
-                android:id="@+id/tv_reminder"
-                android:padding="@dimen/activity_horizontal_margin"
-                android:layout_alignParentRight="true"
-                android:textSize="16sp"
-                android:layout_centerVertical="true"
-                android:textColor="#767676"/>
-        </RelativeLayout>
-
-        <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:paddingRight="@dimen/activity_horizontal_margin"
-            android:id="@+id/view_repeat">
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Repeat"
-                android:padding="@dimen/activity_horizontal_margin"
-                android:textSize="16sp"
-                android:layout_centerVertical="true"
-                android:textColor="#000000"/>
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:gravity="center"
-                android:layout_height="wrap_content"
-                android:text="Everyday"
-                android:id="@+id/tv_repeat"
-                android:padding="@dimen/activity_horizontal_margin"
-                android:layout_alignParentRight="true"
-                android:textSize="16sp"
-                android:layout_centerVertical="true"
-                android:textColor="#767676"/>
-        </RelativeLayout>
-
     </LinearLayout>
-
 </LinearLayout>
