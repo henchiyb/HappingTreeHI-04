@@ -11,14 +11,14 @@
         <ImageView
             android:layout_width="50dp"
             android:layout_height="50dp"
-            android:background="@drawable/watering_can"
+            android:background="@drawable/ic_tap"
             android:backgroundTint="@color/blue"
             android:padding="16dp"
             android:layout_margin="8dp"/>
         <TextView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:text="Chọn bình nước để tìm đường đến chỗ lấy nước"
+            android:text="Chọn hình vòi nước để tìm đường đến chỗ lấy nước"
             android:textColor="#000000"
             android:gravity="center"
             android:padding="4dp"
@@ -57,6 +57,26 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:text="Cây màu xanh là những cây đã đủ nước, không thể tưới."
+            android:textColor="#000000"
+            android:gravity="center"
+            android:padding="4dp"
+            android:textSize="14sp"
+            />
+    </LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <ImageView
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:background="@drawable/watering_can"
+            android:backgroundTint="@color/blue"
+            android:padding="16dp"
+            android:layout_margin="8dp"/>
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:text="Chọn bình nước để bắt đầu tưới"
             android:textColor="#000000"
             android:gravity="center"
             android:padding="4dp"
