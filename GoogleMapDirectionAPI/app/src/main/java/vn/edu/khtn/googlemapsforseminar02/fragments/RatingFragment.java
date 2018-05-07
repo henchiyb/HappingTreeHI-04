@@ -29,7 +29,8 @@ public class RatingFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 Toast.makeText(getActivity(), "Gửi phản hồi thành công", Toast.LENGTH_SHORT).show();
-                edtFeedback.setText("");
+//                edtFeedback.setText("");
+                edtFeedback.getText().clear();
             }
         });
         return view;
