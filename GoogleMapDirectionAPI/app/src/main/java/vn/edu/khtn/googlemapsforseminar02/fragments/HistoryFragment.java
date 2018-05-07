@@ -1,4 +1,4 @@
-package vn.edu.khtn.googlemapsforseminar02;
+package vn.edu.khtn.googlemapsforseminar02.fragments;
 
 import android.media.MediaPlayer;
 import android.os.Bundle;
@@ -10,6 +10,13 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import java.util.ArrayList;
+
+import vn.edu.khtn.googlemapsforseminar02.utils.Constant;
+import vn.edu.khtn.googlemapsforseminar02.objects.HistoryObject;
+import vn.edu.khtn.googlemapsforseminar02.utils.HistoryViewAdapter;
+import vn.edu.khtn.googlemapsforseminar02.R;
+import vn.edu.khtn.googlemapsforseminar02.objects.TreeObject;
+import vn.edu.khtn.googlemapsforseminar02.utils.Utils;
 
 public class HistoryFragment extends Fragment implements View.OnClickListener {
     private RecyclerView recyclerView;

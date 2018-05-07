@@ -1,14 +1,13 @@
-package vn.edu.khtn.googlemapsforseminar02;
+package vn.edu.khtn.googlemapsforseminar02.utils;
 
 import android.graphics.Color;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.widget.TextView;
-import com.squareup.picasso.Picasso;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
 import de.hdodenhof.circleimageview.CircleImageView;
+import vn.edu.khtn.googlemapsforseminar02.R;
+import vn.edu.khtn.googlemapsforseminar02.objects.HistoryObject;
 
 /**
  * Created by Nhan on 10/31/2016.

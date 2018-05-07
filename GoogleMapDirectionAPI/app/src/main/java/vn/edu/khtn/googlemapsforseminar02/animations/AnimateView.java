@@ -1,9 +1,7 @@
-package vn.edu.khtn.googlemapsforseminar02;
+package vn.edu.khtn.googlemapsforseminar02.animations;
 
 import android.os.Handler;
 import android.view.View;
-
-import com.google.android.gms.maps.model.Marker;
 
 /**
  * Created by 10 pro 64bit on 06-Apr-18.

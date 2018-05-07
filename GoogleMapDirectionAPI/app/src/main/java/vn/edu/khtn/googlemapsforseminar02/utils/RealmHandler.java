@@ -1,8 +1,9 @@
-package vn.edu.khtn.googlemapsforseminar02;
+package vn.edu.khtn.googlemapsforseminar02.utils;
 
 import java.util.List;
 
 import io.realm.Realm;
+import vn.edu.khtn.googlemapsforseminar02.objects.HistoryObject;
 
 /**
  * Created by Nhan on 10/31/2016.

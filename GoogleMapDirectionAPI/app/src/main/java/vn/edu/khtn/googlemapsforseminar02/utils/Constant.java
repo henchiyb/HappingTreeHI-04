@@ -1,4 +1,4 @@
-package vn.edu.khtn.googlemapsforseminar02;
+package vn.edu.khtn.googlemapsforseminar02.utils;
 
 /**
  * Created by 10 pro 64bit on 10-Apr-18.

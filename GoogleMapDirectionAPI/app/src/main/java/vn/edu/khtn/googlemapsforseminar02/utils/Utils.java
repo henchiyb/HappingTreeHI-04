@@ -1,4 +1,4 @@
-package vn.edu.khtn.googlemapsforseminar02;
+package vn.edu.khtn.googlemapsforseminar02.utils;
 
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -7,7 +7,6 @@ import android.media.MediaPlayer;
 import android.speech.tts.TextToSpeech;
 
 import java.io.IOException;
-import java.util.Locale;
 
 import static android.content.Context.MODE_PRIVATE;
 

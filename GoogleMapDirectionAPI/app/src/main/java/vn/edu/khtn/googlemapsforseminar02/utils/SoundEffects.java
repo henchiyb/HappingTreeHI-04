@@ -1,4 +1,4 @@
-package vn.edu.khtn.googlemapsforseminar02;
+package vn.edu.khtn.googlemapsforseminar02.utils;
 
 import android.content.Context;
 import android.media.AudioManager;

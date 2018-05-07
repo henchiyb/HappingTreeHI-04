@@ -1,13 +1,9 @@
-package vn.edu.khtn.googlemapsforseminar02;
+package vn.edu.khtn.googlemapsforseminar02.activities;
 
 
 import android.content.DialogInterface;
 
 import android.content.Intent;
-import android.graphics.Color;
-import android.location.Location;
-import android.media.MediaPlayer;
-import android.os.AsyncTask;
 import android.os.Bundle;
 
 import android.os.Handler;
@@ -20,19 +16,18 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
-import com.google.android.gms.maps.model.BitmapDescriptor;
-import com.google.android.gms.maps.model.CustomCap;
-import com.google.android.gms.maps.model.JointType;
-import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.PolylineOptions;
-
-import java.util.ArrayList;
+import vn.edu.khtn.googlemapsforseminar02.R;
+import vn.edu.khtn.googlemapsforseminar02.fragments.RatingFragment;
+import vn.edu.khtn.googlemapsforseminar02.utils.Utils;
+import vn.edu.khtn.googlemapsforseminar02.fragments.HistoryFragment;
+import vn.edu.khtn.googlemapsforseminar02.fragments.MapFragment;
+import vn.edu.khtn.googlemapsforseminar02.fragments.SettingFragment;
+import vn.edu.khtn.googlemapsforseminar02.utils.Constant;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -144,14 +139,16 @@ public class MainActivity extends AppCompatActivity
             if (!(curentFragment instanceof MapFragment)) {
                 openFragment(mapFragment, false);
                 getSupportActionBar().setTitle("Map");
-            }
-            mapFragment.findNearestTree();
+                mapFragment.findNearestTree(this);
+            } else
+                mapFragment.findNearestTree(this);
         } else if (id == R.id.nav_find_water) {
             if (!(curentFragment instanceof MapFragment)) {
                 openFragment(mapFragment, false);
                 getSupportActionBar().setTitle("Map");
-            }
-            mapFragment.findWater();
+                mapFragment.findWater(this);
+            } else
+                mapFragment.findWater(this);
         } else if (id == R.id.nav_map) {
              if (!(curentFragment instanceof MapFragment)) {
                  openFragment(mapFragment, false);
@@ -170,8 +167,14 @@ public class MainActivity extends AppCompatActivity
                  openFragment(fragmentSetting, false);
                  getSupportActionBar().setTitle("Setting");
              }
+         }else if (id == R.id.nav_rating) {
+            if (!(curentFragment instanceof RatingFragment)) {
+                Fragment fragmentRating = new RatingFragment();
+                openFragment(fragmentRating, false);
+                getSupportActionBar().setTitle("Feedback");
+            }
 
-         }else if (id == R.id.nav_instructions) {
+        }else if (id == R.id.nav_instructions) {
             showDialogUserGuide();
          } else if (id == R.id.nav_log_out) {
              AlertDialog.Builder builder = new AlertDialog.Builder(this);

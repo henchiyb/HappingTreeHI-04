@@ -1,4 +1,4 @@
-package vn.edu.khtn.googlemapsforseminar02;
+package vn.edu.khtn.googlemapsforseminar02.animations;
 
 import android.os.Handler;
 

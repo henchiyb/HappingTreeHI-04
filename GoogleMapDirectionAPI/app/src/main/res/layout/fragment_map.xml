@@ -4,7 +4,7 @@
     android:id="@+id/activity_ggmap_direction_api"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="vn.edu.khtn.googlemapsforseminar02.MapFragment">
+    tools:context="vn.edu.khtn.googlemapsforseminar02.fragments.MapFragment">
     <fragment
         android:id="@+id/mapDirection"
         android:name="com.google.android.gms.maps.SupportMapFragment"

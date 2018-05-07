@@ -1,4 +1,4 @@
-package vn.edu.khtn.googlemapsforseminar02;
+package vn.edu.khtn.googlemapsforseminar02.directions;
 
 import com.google.android.gms.maps.model.LatLng;
 import com.google.gson.Gson;
@@ -89,7 +89,6 @@ public class GetDirectionsTask {
                     (((double) lng / 1E5)));
             poly.add(p);
         }
-
         return poly;
     }
 

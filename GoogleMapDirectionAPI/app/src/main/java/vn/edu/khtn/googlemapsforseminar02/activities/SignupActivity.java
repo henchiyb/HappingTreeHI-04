@@ -1,4 +1,4 @@
-package vn.edu.khtn.googlemapsforseminar02;
+package vn.edu.khtn.googlemapsforseminar02.activities;
 
 import android.app.ProgressDialog;
 import android.content.Intent;
@@ -11,8 +11,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
+import vn.edu.khtn.googlemapsforseminar02.R;
 
 public class SignupActivity extends AppCompatActivity {
     private static final String TAG = "SignupActivity";

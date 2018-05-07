@@ -1,7 +1,6 @@
-package vn.edu.khtn.googlemapsforseminar02;
+package vn.edu.khtn.googlemapsforseminar02.fragments;
 
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -10,10 +9,11 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
-import android.widget.RelativeLayout;
-import android.widget.TextView;
 import android.widget.ToggleButton;
+
+import vn.edu.khtn.googlemapsforseminar02.utils.Constant;
+import vn.edu.khtn.googlemapsforseminar02.R;
+import vn.edu.khtn.googlemapsforseminar02.utils.Utils;
 
 /**
  * Created by 10 pro 64bit on 09-Apr-18.
