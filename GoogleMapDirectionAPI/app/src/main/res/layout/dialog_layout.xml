@@ -9,7 +9,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="16dp"
-        android:text="Đây là cây Phượng. Thân gỗ. Đang thiếu nước"
+        android:text="Đây là cây thân gỗ, tán lá rộng, cần nhiều nước để phát triển. Cây đang thiếu nước"
         android:textSize="16sp"
         android:textStyle="bold"
         android:layout_centerHorizontal="true"

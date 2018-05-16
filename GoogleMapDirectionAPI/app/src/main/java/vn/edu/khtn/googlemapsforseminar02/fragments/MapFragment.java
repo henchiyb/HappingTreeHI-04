@@ -95,7 +95,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, Locatio
     private Marker findWaterMarker;
     private Marker findTreeMarker;
     private Marker isSelectedMarker;
-    private Location myLocation;
+    private int currentProgress = 80;
     private FusedLocationProviderClient mFusedLocationClient;
 
     @Nullable
@@ -112,8 +112,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, Locatio
         btnCancelMultiple = view.findViewById(R.id.btn_cancel_multiple);
         tvInstructionsWay = view.findViewById(R.id.tv_instruction);
         waveProgressView = view.findViewById(R.id.waveProgressbar);
-        waveProgressView.setCurrent(80, "");
         waveProgressView.setMaxProgress(100);
+        waveProgressView.setCurrent(currentProgress, "");
         waveProgressView.setText("#FFFF00", 40);
         waveProgressView.setWaveColor("#5b9ef4"); //"#5b9ef4"
         waveProgressView.setWave(5, 20);
@@ -232,36 +232,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, Locatio
         return bestProvider;
     }
 
-    @SuppressLint("MissingPermission")
-    private Location getMyLocation() {
-        mFusedLocationClient.getLastLocation()
-                .addOnSuccessListener(getActivity(), new OnSuccessListener<Location>() {
-                    @Override
-                    public void onSuccess(Location location) {
-                        // Got last known myLocation. In some rare situations this can be null.
-                        if (location != null) {
-                            myLocation = location;
-                        }
-                    }
-                });
-        if (myLocation == null) {
-            LocationManager locationManager = (LocationManager) context.getSystemService(LOCATION_SERVICE);
-            String locationProvider = this.getEnabledLocationProvider();
-            Log.d(MYTAG, "test");
-            if (locationProvider == null) {
-                return null;
-            }
-            final long MIN_TIME_BW_UPDATES = 1000;
-            final float MIN_DISTANCE_CHANGE_FOR_UPDATES = 1;
-            locationManager.requestLocationUpdates(
-                    locationProvider,
-                    MIN_TIME_BW_UPDATES,
-                    MIN_DISTANCE_CHANGE_FOR_UPDATES, (LocationListener) this);
-            myLocation = locationManager.getLastKnownLocation(locationProvider);
-        }
-        return myLocation;
-    }
-
     private Marker createTreeMarker(LatLng position, int iconID, float alpha) {
         MarkerOptions option = new MarkerOptions();
         option.position(position);
@@ -339,6 +309,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, Locatio
 
     @SuppressLint("MissingPermission")
     public void findWater(Activity activity) {
+        prevSelectedMarker = findWaterMarker;
         mFusedLocationClient.getLastLocation()
                 .addOnSuccessListener(activity, new OnSuccessListener<Location>() {
                     @Override
@@ -394,6 +365,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, Locatio
                     }
                 });
     }
+
     @Override
     public void onMapReady(GoogleMap googleMap) {
         this.map = googleMap;
@@ -416,14 +388,17 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, Locatio
                             Manifest.permission.ACCESS_FINE_LOCATION};
 
                     // Hiển thị một Dialog hỏi người dùng cho phép các quyền trên.
-                    ActivityCompat.requestPermissions(context, permissions,
+                    requestPermissions(permissions,
                             REQUEST_ID_ACCESS_COURSE_FINE_LOCATION);
-
-                    return;
                 }
             }
         }
-        map.setMyLocationEnabled(true);
+        if (ActivityCompat.checkSelfPermission(context,
+                Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                && ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+        } else {
+            map.setMyLocationEnabled(true);
+        }
         if (listMarker.size() == 0) {
             LatLng haYen = new LatLng(21.0207512, 105.7938957);
             LatLng layNuoc = new LatLng(21.030754, 105.7938977);
@@ -606,75 +581,85 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, Locatio
             marker20.setSnippet("Tôi đã đủ nước rồi");
             listMarkerCannotWater.add(marker20);
         }
-         waveProgressView.setOnClickListener(new View.OnClickListener() {
+        waveProgressView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 SoundEffects.getInstance(context).playSoundClick();
-                AlertDialog.Builder builder = new AlertDialog.Builder(context);
-                builder.setTitle("Tưới nước");
-                builder.setIcon(R.drawable.ic_add_water_black_24dp);
-                builder.setMessage("Bắt đầu tưới nước ?");
-                builder.setCancelable(false);
-                builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialogInterface, int i) {
-                                if (isSelectedMarker == null){
-                                    Toast.makeText(context, "Hãy chọn 1 cây để tưới", Toast.LENGTH_SHORT).show();
-                                } else {
-                                    SoundEffects.getInstance(context).playSoundClick();
-                                    tvInstructionsWay.setVisibility(View.GONE);
-                                    Toast.makeText(context, "Di chuyển xung quanh gốc cây để tưới nước", Toast.LENGTH_SHORT).show();
-                                    textToSpeech.speak("Di chuyển xung quanh gốc cây để tưới nước", TextToSpeech.QUEUE_FLUSH, null);
-                                    final ProgressDialog progressDialog = new ProgressDialog(getActivity(),
-                                            R.style.AppTheme_Dark_Dialog);
-                                    progressDialog.setIndeterminate(true);
-                                    progressDialog.setCancelable(false);
-                                    progressDialog.setMessage("Tưới cây ...");
-                                    progressDialog.show();
-                                    new Handler().postDelayed(new Runnable() {
-                                        @Override
-                                        public void run() {
-                                            progressDialog.dismiss();
-                                            waveProgressView.setCurrent(30, "");
+                if (currentProgress != 30) {
+                    AlertDialog.Builder builder = new AlertDialog.Builder(context);
+                    builder.setTitle("Tưới nước");
+                    builder.setIcon(R.drawable.ic_add_water_black_24dp);
+                    builder.setMessage("Bắt đầu tưới nước ?");
+                    builder.setCancelable(false);
+                    builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            if (isSelectedMarker == null) {
+                                Toast.makeText(context, "Hãy chọn 1 cây để tưới", Toast.LENGTH_SHORT).show();
+                            } else {
+                                SoundEffects.getInstance(context).playSoundClick();
+                                tvInstructionsWay.setVisibility(View.GONE);
+                                currentProgress -= 25;
+                                waveProgressView.setCurrent(currentProgress, "");
+                                Toast.makeText(context, "Di chuyển xung quanh gốc cây để tưới nước", Toast.LENGTH_SHORT).show();
+                                textToSpeech.speak("Di chuyển xung quanh gốc cây để tưới nước", TextToSpeech.QUEUE_FLUSH, null);
+                                final ProgressDialog progressDialog = new ProgressDialog(getActivity(),
+                                        R.style.AppTheme_Dark_Dialog);
+                                progressDialog.setIndeterminate(true);
+                                progressDialog.setCancelable(false);
+                                progressDialog.setMessage("Tưới cây ...");
+                                progressDialog.show();
+                                new Handler().postDelayed(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        progressDialog.dismiss();
+                                        if (currentProgress == 30){
                                             waveProgressView.setWaveColor("#D80027");
-                                            isSelectedMarker.setIcon(bitmapDescriptorFromVector(context,
-                                                    R.drawable.ic_tree_with_three_circles_of_foliage_green));
-                                            listMarkerCanWater.remove(isSelectedMarker);
-                                            listMarkerCannotWater.add(isSelectedMarker);
                                             Toast.makeText(context, "Bạn sắp hết nước." +
                                                             " Hãy ấn vào biểu tượng vòi nước trên bản đồ để xem đường lấy nước.",
                                                     Toast.LENGTH_LONG).show();
-                                            textToSpeech.speak("Đã tưới đủ. Đợi xác nhận lượng nước đã tưới", TextToSpeech.QUEUE_FLUSH, null);
-                                            final ProgressDialog progressDialog = new ProgressDialog(getActivity(),
-                                                    R.style.AppTheme_Dark_Dialog);
-                                            progressDialog.setIndeterminate(true);
-                                            progressDialog.setMessage("Xác nhận ...");
-                                            progressDialog.setCancelable(false);
-                                            progressDialog.show();
-                                            new android.os.Handler().postDelayed(
-                                                    new Runnable() {
-                                                        public void run() {
-                                                            progressDialog.dismiss();
-                                                            Toast.makeText(context, "Hoàn thành xác nhận", Toast.LENGTH_SHORT).show();
-                                                        }
-                                                    }, 5000);
                                         }
-                                    }, 4000);
-                                }
+                                        waveProgressView.setCurrent(currentProgress, "");
+                                        isSelectedMarker.setIcon(bitmapDescriptorFromVector(context,
+                                                R.drawable.ic_tree_with_three_circles_of_foliage_green));
+                                        listMarkerCanWater.remove(isSelectedMarker);
+                                        listMarkerCannotWater.add(isSelectedMarker);
+                                        textToSpeech.speak("Đã tưới đủ. Đợi xác nhận lượng nước đã tưới", TextToSpeech.QUEUE_FLUSH, null);
+                                        final ProgressDialog progressDialog = new ProgressDialog(getActivity(),
+                                                R.style.AppTheme_Dark_Dialog);
+                                        progressDialog.setIndeterminate(true);
+                                        progressDialog.setMessage("Xác nhận ...");
+                                        progressDialog.setCancelable(false);
+                                        progressDialog.show();
+                                        new android.os.Handler().postDelayed(
+                                                new Runnable() {
+                                                    public void run() {
+                                                        progressDialog.dismiss();
+                                                        Log.d("NUOC: ", currentProgress + "");
+                                                        Toast.makeText(context, "Hoàn thành xác nhận", Toast.LENGTH_SHORT).show();
+                                                    }
+                                                }, 5000);
+                                    }
+                                }, 4000);
                             }
-                        });
-                builder.setNegativeButton("Thoát", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        SoundEffects.getInstance(context).playSoundClick();
-                        tvInstructionsWay.setVisibility(View.GONE);
-                        dialogInterface.dismiss();
-                    }
-                });
-                AlertDialog alertDialog = builder.create();
-                alertDialog.show();
+                        }
+                    });
+                    builder.setNegativeButton("Thoát", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            SoundEffects.getInstance(context).playSoundClick();
+                            tvInstructionsWay.setVisibility(View.GONE);
+                            dialogInterface.dismiss();
+                        }
+                    });
+                    AlertDialog alertDialog = builder.create();
+                    alertDialog.show();
+                } else {
+                    findWater(getActivity());
+                }
             }
         });
+
 
         map.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
             @SuppressLint({"StaticFieldLeak", "MissingPermission"})
@@ -686,7 +671,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, Locatio
                             public void onSuccess(final Location location) {
                                 // Got last known myLocation. In some rare situations this can be null.
                                 if (location != null) {
-                                    if(!isMultipleChoiceMarker) {
+                                    if (!isMultipleChoiceMarker) {
                                         if (!listMarkerWater.contains(marker)) {
                                             if (listMarkerCanWater.contains(marker)) {
                                                 SoundEffects.getInstance(context).playSoundClick();
@@ -784,7 +769,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, Locatio
                                                 alertDialog.show();
                                             }
                                         } else {
-                                            if (polyline != null && marker.getAlpha() == 1.0f) {
+                                            if (polyline != null && marker.equals(prevSelectedMarker)) {
                                                 SoundEffects.getInstance(context).playSoundClick();
                                                 AlertDialog.Builder builder = new AlertDialog.Builder(context);
                                                 builder.setTitle("Xác nhận lấy nước");
@@ -795,7 +780,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, Locatio
                                                     @Override
                                                     public void onClick(DialogInterface dialogInterface, int i) {
                                                         waveProgressView.setWaveColor("#5b9ef4");
-                                                        waveProgressView.setCurrent(80, "");
+                                                        currentProgress = 80;
+                                                        waveProgressView.setCurrent(currentProgress, "");
                                                         Polyline poly = map.addPolyline(polyline);
                                                         poly.remove();
                                                     }
@@ -896,12 +882,12 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, Locatio
         map.setOnMapLongClickListener(new GoogleMap.OnMapLongClickListener() {
             @Override
             public void onMapLongClick(LatLng latLng) {
-                ((MainActivity)getActivity()).getSupportActionBar().setTitle("Chọn nhiều cây");
+                ((MainActivity) getActivity()).getSupportActionBar().setTitle("Chọn nhiều cây");
                 listMarkerSelected = new ArrayList();
                 isMultipleChoiceMarker = true;
                 btnOKMultiple.setVisibility(View.VISIBLE);
                 btnCancelMultiple.setVisibility(View.VISIBLE);
-                for (int i = 0; i < listMarker.size(); i ++){
+                for (int i = 0; i < listMarker.size(); i++) {
                     listMarker.get(i).setAlpha(0.5F);
                 }
                 if (line != null)
@@ -917,7 +903,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, Locatio
                 btnOKMultiple.setVisibility(View.GONE);
                 btnCancelMultiple.setVisibility(View.GONE);
                 isMultipleChoiceMarker = false;
-                for (int i = 0; i < listMarkerSelected.size(); i ++){
+                for (int i = 0; i < listMarkerSelected.size(); i++) {
                     listMarkerSelected.get(i).setAlpha(1.0F);
                 }
                 if (listMarkerSelected.size() != 0) {
@@ -989,11 +975,11 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, Locatio
                 btnOKMultiple.setVisibility(View.GONE);
                 btnCancelMultiple.setVisibility(View.GONE);
                 isMultipleChoiceMarker = false;
-                for (int i = 0; i < listMarker.size(); i ++){
+                for (int i = 0; i < listMarker.size(); i++) {
                     listMarker.get(i).setAlpha(1.0F);
                 }
                 listMarkerSelected = new ArrayList<>();
-                ((MainActivity)getActivity()).getSupportActionBar().setTitle("Map");
+                ((MainActivity) getActivity()).getSupportActionBar().setTitle("Map");
             }
         });
     }
@@ -1012,9 +998,10 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, Locatio
         }
         if (line != null)
             line.remove();
-        ((MainActivity)getActivity()).getSupportActionBar().setTitle("Map");
+        ((MainActivity) getActivity()).getSupportActionBar().setTitle("Map");
     }
-    public BitmapDescriptor getEndCapIcon(Context context,  int color) {
+
+    public BitmapDescriptor getEndCapIcon(Context context, int color) {
         // mipmap icon - white arrow, pointing up, with point at center of image
         // you will want to create:  mdpi=24x24, hdpi=36x36, xhdpi=48x48, xxhdpi=72x72, xxxhdpi=96x96
         Drawable drawable = ContextCompat.getDrawable(context, R.drawable.ic_send_black_24dp);
@@ -1032,20 +1019,19 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, Locatio
         // create a BitmapDescriptor from the new bitmap
         return BitmapDescriptorFactory.fromBitmap(rotateBitmap(bitmap, 90));
     }
+
     private Bitmap rotateBitmap(Bitmap source, float angle) {
         Matrix matrix = new Matrix();
         matrix.postRotate(angle);
         return Bitmap.createBitmap(source, 0, 0, source.getWidth(), source.getHeight(), matrix, true);
     }
-    @Override
-    public void onRequestPermissionsResult(int requestCode,
-                                           String permissions[], int[] grantResults) {
 
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        //
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+        Log.d("test", "test");
+//        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         switch (requestCode) {
             case REQUEST_ID_ACCESS_COURSE_FINE_LOCATION: {
-
                 // Chú ý: Nếu yêu cầu bị bỏ qua, mảng kết quả là rỗng.
                 if (grantResults.length > 1
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED
@@ -1053,7 +1039,14 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, Locatio
 
                     Toast.makeText(context, "Permission granted!", Toast.LENGTH_LONG).show();
                     // Hiển thị vị trí hiện thời trên bản đồ.
-                    this.showMyLocation();
+                    if (ActivityCompat.checkSelfPermission(context,
+                            Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                            && ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+
+                    }else {
+                        map.setMyLocationEnabled(true);
+                    }
+//                    this.showMyLocation();
                 }
                 // Hủy bỏ hoặc từ chối.
                 else {
@@ -1064,24 +1057,27 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, Locatio
         }
     }
 
+    @SuppressLint("MissingPermission")
     private void showMyLocation() {
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                myLocation = getMyLocation();
-                if (myLocation != null) {
-                    LatLng latLng = new LatLng(myLocation.getLatitude(), myLocation.getLongitude());
-                    map.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 17));
-                } else {
-                    Toast.makeText(context, "Location not found!", Toast.LENGTH_LONG).show();
-                    Log.i(MYTAG, "Location not found");
-                }
-            }
-        }, 2000);
+        mFusedLocationClient.getLastLocation()
+                .addOnSuccessListener(getActivity(), new OnSuccessListener<Location>() {
+                    @Override
+                    public void onSuccess(Location location) {
+                        // Got last known myLocation. In some rare situations this can be null.
+                        if (location != null) {
+                            LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
+                            map.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 17));
+                        } else {
+                            Toast.makeText(context, "Location not found!", Toast.LENGTH_LONG).show();
+                            Log.i(MYTAG, "Location not found");
+                        }
+                    }
+                });
     }
+
     @Override
     public void onLocationChanged(Location location) {
-        myLocation = location;
+
     }
 
     @Override
